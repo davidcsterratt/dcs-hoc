@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) { execute("strdef pkgversions") } 
-sprint(pkgversions,"%sutils = $Revision: 1.14 $, ",pkgversions)
+sprint(pkgversions,"%sutils = $Revision: 1.15 $, ",pkgversions)
 
 //
 // error(String error) 
@@ -89,23 +89,28 @@ endtemplate Integrator
 // object_is(objref obj, String classname)
 // 
 begintemplate ObjectClass
-public object_is
+public object_is, object_name
 public objrefid, objind, objid
-strdef tmpstr
-objref this
+strdef tmpstr, objclass
+objref this, sf
 proc init() {
     objrefid = 0
     objind = 0
     objid = 0
+    sf = new StringFunctions()
 }
-func object_is() {
-    sprint(tmpstr,"%s.objrefid = object_id(%s)",this,$s1)
-    execute(tmpstr)
-    sprint(tmpstr,"%s.objind = object_id(%s,1)",this,$s1)
-    execute(tmpstr)
-    sprint(tmpstr, "%s.objid = object_id(%s[%g])",this,$s2,objind)
-    execute(tmpstr)
-    return (objid == objrefid)
+
+proc object_name() {
+    sprint(tmpstr,"%s",$o1)
+    print tmpstr
+    print $o1
+}
+
+func object_is() { local ind
+    sprint(tmpstr,"%s",$o1)
+    print tmpstr
+    sf.head(tmpstr,"\[[0-9]",objclass)
+    return !strcmp(objclass,$s2)
 }
 endtemplate ObjectClass
 
