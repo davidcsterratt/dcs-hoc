@@ -1,14 +1,17 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sTreePlot = $Revision: 1.1 $, ",pkgversions)
+sprint(pkgversions,"%sTreePlot = $Revision: 1.2 $, ",pkgversions)
 
 load_file("TreePlot.hoc")
+load_file("RPlot.hoc")
 
 begintemplate TreePlotArray
-public glist, cellref
+public glist, cellref, rplot
 
 objref vb
 objref hblist
 objref glist
+objref rp
+strdef rfilename
 
 // TreePlotArray(double rows, double cols)
 proc init() { local i, j
@@ -29,10 +32,24 @@ proc init() { local i, j
     }
     vb.intercept(0)
     vb.map
+    rfilename = "/tmp/TreePlotArray"
 }
 
 proc cellref() {
     $o1 = glist.object($2*cols + $3)
+}
+
+proc rplot() { local i, j
+    rp = new RPlot(rfilename)
+    rp.start_plot("/tmp/TreePlotArray.ps")
+    rp.set_mfrow(rows,cols)
+    for i=0,rows-1 {
+        for j = 0,cols-1 {
+            rp.add_graph(glist.object(i*cols+j))
+        }
+    }
+    rp.end_plot()
+    rp.run()
 }
 
 endtemplate TreePlotArray
