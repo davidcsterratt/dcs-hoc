@@ -1,19 +1,20 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sTreePlot = $Revision: 1.9 $, ",pkgversions)
+sprint(pkgversions,"%sTreePlot = $Revision: 1.10 $, ",pkgversions)
 
 load_file("RPlot.hoc")
 
 begintemplate TreePlot
 
 public plot, lines, marks
+public view, size, family
 public getline, line_info, view_info
 public getmarks
-public graph, xvec, yvec, diamvec, parentsvec, view, size
-public view_equal_plot, auto_limits_on, set_limits, get_limit
+public graph
+
+public rprintfile
 public set_xlab, get_xlab
 public set_ylab, get_ylab
-public rprintfile
-public rp
+public view_equal_plot, auto_limits_on, set_limits, get_limit
 
 objref graph, xvec, yvec, diamvec, parentsvec
 objref tmpxvec, tmpyvec
@@ -39,8 +40,9 @@ proc init() { local i
     xmarklist = new List()
     ymarklist = new List()
     colour=1
-    lines_flag=1
-    marks_flag=0
+    lines_flag=1                        // Show lines
+    marks_flag=0                        // Don't show marks
+    family_flag=0                       // Whether to keep lines
     for i=0,3 { auto_flag[i] = 1 }
     xlab = ""
     ylab = ""
@@ -50,6 +52,13 @@ proc plot() { local i
     xvec = $o1
     yvec = $o2
     parentsvec = $o3
+    
+    // Clear graph if required
+    if (!family_flag) { 
+        graph.erase_all() 
+        colour=1
+    }
+    
     // So that crosshair_action works, do invisible line
     yvec.line(graph,xvec,0,1)
     if (lines_flag) {
@@ -71,29 +80,22 @@ proc plot() { local i
 }
 
 // turn lines on or off
-proc lines() {
-    lines_flag = $1
-}
+proc lines() { lines_flag = $1 }
 
 // turn marks on or off
-proc marks() {
-    marks_flag = $1
-}
+proc marks() { marks_flag = $1 }
 
 // mleft, mbottom, mwidth, mheight, wleft, wtop, wwidth, wheight
-proc view() {
-    graph.view($1,$2,$3,$4,$5,$6,$7,$8)
-}
+proc view() { graph.view($1,$2,$3,$4,$5,$6,$7,$8) }
 
 // Clone of Graph.size()
-proc size() {
-    graph.size($1,$2,$3,$4)
-}
+proc size() { graph.size($1,$2,$3,$4) }
+
+// Part of functionality of Graph.family()
+proc family() { family_flag = $1 }
 
 // Clone of Graph.getline()
-func getline() {
-    return graph.getline($1,$o2,$o3)
-}
+func getline() { return graph.getline($1,$o2,$o3) }
 
 // Analogue of getline() for marks
 func getmarks() { local i
