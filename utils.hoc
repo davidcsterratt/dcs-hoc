@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) { execute("strdef pkgversions") } 
-sprint(pkgversions,"%sutils = $Revision: 1.16 $, ",pkgversions)
+sprint(pkgversions,"%sutils = $Revision: 1.17 $, ",pkgversions)
 
 //
 // error(String error) 
@@ -105,7 +105,11 @@ proc object_name() {
 
 func object_is() { local ind
     sprint(tmpstr,"%s",$o1)
-    sf.head(tmpstr,"\[[0-9]",objclass)
+    if (!strcmp(tmpstr,"NULLobject")) {
+        objclass = tmpstr
+    } else {
+        sf.head(tmpstr,"\[[0-9]",objclass)
+    }
     return !strcmp(objclass,$s2)
 }
 endtemplate ObjectClass
