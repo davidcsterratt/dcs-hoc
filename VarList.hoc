@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sVarList = $Revision: 1.14 $, ",pkgversions)
+sprint(pkgversions,"%sVarList = $Revision: 1.15 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
 load_file("ObjectClass.hoc")
@@ -202,6 +202,7 @@ public appendString, appendSetString
 public appendVector
 public appendVectorList
 public appendMatrix
+public remove
 public printVarNames
 public printf, printf_actions 
 public fprint, fprint_actions
