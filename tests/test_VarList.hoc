@@ -1,0 +1,50 @@
+load_file("VarList.hoc")
+objref p 
+a = 5
+p = new DoubleVar("a")
+p.printf()
+
+strdef s 
+s = "bla"
+objref p1 
+p1 = new StringVar("s")
+p1.printf()
+
+objref vec
+vec = new Vector(10)
+vec.indgen()
+objref p2
+p2 = new VectorVar("vec")
+p2.printf()
+
+objref pl
+pl = new VarList()
+b = 2
+pl.appendDouble("a")
+pl.appendDouble("b")
+pl.appendString("s")
+pl.appendSetDouble("c", 7.3846,"print c")
+pl.appendSetString("y", "hello","print y")
+pl.appendVector("vec")
+
+objref f
+f = new FormatFile("blee","hoc")
+f.wopen()
+pl.fprint(f)
+pl.fprint_actions(f)
+f.close()
+
+pl.printf_actions()
+pl.execute_actions()
+
+// pl.save()
+
+xpanel("Parameters")
+pl.xstatebutton("A variable","a")
+pl.xvalue("Another variable","b")
+xpanel()
+
+xpanel("Parameters")
+pl.xstatebutton("A variable","sdkh")
+pl.xvalue("Another variable","b")
+xpanel()
