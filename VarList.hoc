@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sVarList = $Revision: 1.11 $, ",pkgversions)
+sprint(pkgversions,"%sVarList = $Revision: 1.12 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
 load_file("utils.hoc")
@@ -181,6 +181,7 @@ proc append() {
 }
 
 proc appendDouble() {
+    remove($s1)
     if (numarg() == 3) { l.append(new DoubleVar($s1, $s2, $s3)) }
     if (numarg() == 2) { l.append(new DoubleVar($s1, $s2)) }
     if (numarg() == 1) { l.append(new DoubleVar($s1)) }
@@ -197,6 +198,7 @@ proc appendSetDouble() {
 
 
 proc appendString() {
+    remove($s1)
     if ( numarg() >= 2 ) {
         l.append(new StringVar($s1,$s2))
     } else {
@@ -217,6 +219,7 @@ proc appendSetString() {
 }
 
 proc appendVector() {
+    remove($s1)
     if ( numarg() >= 2 ) {
         l.append(new VectorVar($s1,$s2))
     } else {
@@ -225,6 +228,7 @@ proc appendVector() {
 }
 
 proc appendVectorList() {
+    remove($s1)
     if ( numarg() == 3 ) { l.append(new VectorListVar($s1,$s2,$3)) }
     if ( numarg() == 2 ) { l.append(new VectorListVar($s1,$s2)) }
     if ( numarg() == 1 ) { l.append(new VectorListVar($s1)) }
@@ -307,6 +311,12 @@ func find () { local i
         }
     }
     return -1
+}
+
+proc remove() { local ind
+    if ((ind = find($s1)) != -1) {
+        l.remove(ind)
+    }
 }
 
 proc xstatebutton() { local ind
