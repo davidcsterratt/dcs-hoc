@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sRPlot = $Revision: 1.11 $, ",pkgversions)
+sprint(pkgversions,"%sRPlot = $Revision: 1.12 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
 load_file("ObjectClass.hoc")
@@ -145,9 +145,6 @@ proc end_plot() {
 
 proc run() {
     fu.basename(rfilename,tmp)
-    print rfilename
-    print tmpdir
-    print tmp
     sprint(cmd,"R BATCH %s.R %s/%s.Rout", rfilename,tmpdir,tmp)
     system(cmd)
 }
