@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sFormatFile = $Revision: 1.5 $, ",pkgversions)
+sprint(pkgversions,"%sFormatFile = $Revision: 1.6 $, ",pkgversions)
 
 /*
 
@@ -54,11 +54,12 @@ f.printmat("matrix_name", matrix)
 
 Prints matrix to f using the name matrix_name.
 
-f.printlistasmat("matrix_name", list)
+f.printlistasmat("matrix_name", list [, init_value ])
 
-Prints list where each element is a vector as a matrix to f using 
-the name matrix_name.  At the moment every vector should be the same
-length; there is no error checking in the function.
+Prints list where each element is a vector as a matrix to f using the
+name matrix_name.  The vectors can be different lengths.  If they are
+different lengths, init_value specifies the value to give elements
+that have to be filled in; the default is 0.
 
 f.printstr("string_name", string)
 
@@ -366,9 +367,30 @@ proc printmat () { local i, j, nrows, ncols
 //
 // printlistasmat
 // 
-proc printlistasmat () { local i
-    tmpmat = new Matrix($o2.count(), $o2.object(0).size())
+proc printlistasmat () { local i, ncol, init_value
+    //
+    // Deal with input arguments
+    //
+    if (numarg()==3) {
+        init_value = $3 
+    } else {
+        init_value = 0
+    }
+    //
+    // Make a matrix big enough
+    //
+    ncol = 0
     for i=0,$o2.count()-1 {
+        if ($o2.object(i).size()>ncol) {
+            ncol = $o2.object(i).size()
+        }
+    }
+    tmpmat = new Matrix($o2.count(), ncol)
+    //
+    // Fill it with the vectors in the list
+    //
+    for i=0,$o2.count()-1 {
+        tmpmat.setrow(i, init_value)
         tmpmat.setrow(i, $o2.object(i))
     }
     printmat($s1, tmpmat)
@@ -383,7 +405,6 @@ proc printstr () {
     f.printf("'%s' ", $s2)
     f.printf(" ;\n")
 }
-
 
 
 //
