@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sNmdaAmpaSpineSynStim = $Revision: 1.1 $, ",pkgversions)
+sprint(pkgversions,"%sNmdaAmpaSpineSynStim = $Revision: 1.2 $, ",pkgversions)
 
 load_file("SimpleSpine.hoc")
 
@@ -17,17 +17,17 @@ ess.get_distance()      - returns distance from origin specified by distance()
 begintemplate NmdaAmpaSpineSynStim
 
 public loc,  get_distance // get_loc,
-public expsyn, nmdasyn, netcon, nmdanetcon, netstim, spine
-objref expsyn, nmdasyn, netcon, nmdanetcon, netstim, spine 
+public ampasyn, nmdasyn, netcon, nmdanetcon, netstim, spine
+objref ampasyn, nmdasyn, netcon, nmdanetcon, netstim, spine 
 
 proc init() {
     if (numarg() == 1) { spine = new SimpleSpine(0.5) }
     if (numarg() == 2) { spine = new SimpleSpine(0.5, $2) }
     spine.head {
-        expsyn  = new Exp2Syn(0.5)
+        ampasyn = new AmpaSyn(0.5)
         nmdasyn = new NmdaSyn(0.5)
         netstim = new NetStim(0.5)
-        netcon  = new NetCon(netstim,expsyn)
+        netcon  = new NetCon(netstim,ampasyn)
         nmdanetcon = new NetCon(netstim,nmdasyn)
     }
 }
@@ -43,7 +43,7 @@ proc loc() {
 // }
 
 func get_distance() {
-    dist = distance(expsyn.get_loc()) // Seems to work, though not documented
+    dist = distance(ampasyn.get_loc()) // Seems to work, though not documented
     pop_section()                 // needed to keep the stack in order
     return dist
 }
