@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sFormatFile = $Revision: 1.8 $, ",pkgversions)
+sprint(pkgversions,"%sFormatFile = $Revision: 1.9 $, ",pkgversions)
 
 /*
 
@@ -18,7 +18,7 @@ f = new FormatFile(String file, String format, Structname structname)
 
 Sets up a new FormatFile that will print objects to file in format,
 where format can be "R" or "Matlab" and will put every object into a
-structure ccalled structname.
+structure called structname.
 
 f.wopen()
 f.aopen()
@@ -89,11 +89,15 @@ public printdouble
 public printvec
 public printmat
 public printlistasmat
+public print_VectorList
 public printstr
 public setprintdouble
 public setprintstr
 public printf
 public chooser
+public unlink
+public f
+
 
 // Private variables
 
@@ -255,7 +259,7 @@ func max() {
 proc printdouble() {
     sprint(varname, "%s%s", prefix, $s1) 
     f.printf("%s %s ", varname, assop)
-    f.printf("%g ", $2)
+    f.printf("%.10g ", $2)
     f.printf("%s\n",lineend)
 
 }
@@ -295,6 +299,7 @@ proc printvec() {
     //     }
     if (!strcmp(format, "R")) {
         f.printf("%s <- c()%s\n",varname,lineend)
+        f.printf("%s <- rep(NA,%g)\n",varname,$o2.size(),lineend)
     }
     
     if (!strcmp(format, "hoc")) {
@@ -339,7 +344,7 @@ proc printvec_generic () { local i, chunk_size,  total_size, pos, name, blockend
             }
             
             // Print out element itself
-            f.printf("%g%s", $o2.x(j), elsep)
+            f.printf("%.10g%s", $o2.x(j), elsep)
         }
         
         // Print end of vector
@@ -351,7 +356,7 @@ proc printvec_hoc() { local i
     f.printf("objref %s\n", $s1)
     f.printf("%s = new Vector(%g)\n", $s1, $o2.size())
     for i=0, $o2.size()-1 {
-        f.printf("%s.x(%g) = %g\n",$s1, i, $o2.x(i))
+        f.printf("%s.x(%g) = %.10g\n",$s1, i, $o2.x(i))
     }
 }
 
@@ -433,6 +438,17 @@ proc printlistasmat () { local i, ncol, init_value
 // f.printstr("string_name", string)
 // 
 
+proc print_VectorList () { local i
+        f.printf("%s%s %s ", prefix, $s1, assop)
+        if (!strcmp(format, "R")) {
+            f.printf("list()\n")
+        }
+        for i=0, $o2.count()-1 {
+            sprint(tmpstr,"%s[[%g]]",$s1,i+1)
+            printvec(tmpstr, $o2.object(i))
+        }
+}
+
 proc printstr () { 
     f.printf("%s%s %s ", prefix, $s1, assop)
     f.printf("%s%s%s ", quot,$s2,quot)
@@ -448,7 +464,7 @@ proc printstr () {
 // 
 
 proc setprintdouble () {
-    sprint(tmpstr, "%s = %g", $s1, $2)
+    sprint(tmpstr, "%s = %.10g", $s1, $2)
     execute(tmpstr)
     printdouble($s1, $2)
 }
@@ -470,7 +486,8 @@ proc setprintstr () {
 // 
 
 proc printf() {
-    f.printf($s1,$s2) 
+    if (numarg() == 2) { f.printf($s1,$s2) }
+    if (numarg() == 1) { f.printf($s1) }
 }
 
 proc chooser() { local i 
@@ -485,5 +502,10 @@ proc chooser() { local i
     execute(tmpstr,this)
     filename = f.getname()
 }
+
+proc unlink() {
+    f.unlink()
+}
+    
 
 endtemplate FormatFile
