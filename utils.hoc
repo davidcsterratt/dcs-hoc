@@ -17,14 +17,22 @@ proc setwritepar () {
 //
 // printfvec(file_handle, vector, "vector_name")
 // 
-// print vector_name to file_handle in matlab format
+// Print vector to file_handle in matlab format with name vector_name.
+// If vector is longer than the local varible chunk_size, it is split 
+// into lines of chunk_size elements or less, separated by the matlab line 
+// continuation symbol "...".  
 // 
 
-proc printfvec () { local n
+proc printfvec () { local i, chunk_size
+    chunk_size = 10             // How many figures per line to print
+    size = $o2.size()
     $o1.printf("%s = [ ", $s3)
-    //    sprint(utils_tmpstr2, "%s.printf($o1, \"8.2f \")", $s2)
-    //    execute(utils_tmpstr2)
-    n = $o2.printf($o1, "%8.2f ")
+    for i = 0, (size - 1) {
+        $o1.printf("%8.2f ", $o2.x(i))
+        if ( ( ( i + 1 ) % chunk_size ) == 0 ) {
+            $o1.printf(" ...\n") 
+        }
+    }
     $o1.printf(" ];\n")
 }
 
