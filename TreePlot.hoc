@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sTreePlot = $Revision: 1.7 $, ",pkgversions)
+sprint(pkgversions,"%sTreePlot = $Revision: 1.8 $, ",pkgversions)
 
 begintemplate TreePlot
 
@@ -7,7 +7,7 @@ public plot, lines, marks
 public getline, line_info, view_info
 public getmarks
 public graph, xvec, yvec, diamvec, parentsvec, view, size
-public view_equal_plot, auto_limits_on, set_limits
+public view_equal_plot, auto_limits_on, set_limits, get_limit
 public set_xlab, get_xlab
 public set_ylab, get_ylab
 
@@ -137,6 +137,10 @@ proc view_equal_plot() { local i
         }
     }
     size(limits[0], limits[1], limits[2], limits[3])
+}
+
+func get_limit() { 
+    return limits[$1-1] 
 }
 
 proc set_xlab() { xlab = $s1 } 
