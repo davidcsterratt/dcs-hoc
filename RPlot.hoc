@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sRPlot = $Revision: 1.7 $, ",pkgversions)
+sprint(pkgversions,"%sRPlot = $Revision: 1.8 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
 load_file("utils.hoc")
@@ -147,7 +147,9 @@ proc run() {
 proc plot() {
     clear()
     start_plot($s2)
-    add_graph($o1)
+    if (numarg() == 2) { add_graph($o1) }
+    if (numarg() == 3) { add_graph($o1, $s3) }
+    if (numarg() == 4) { add_graph($o1, $s3, $s4) }
     end_plot()
     run()
 }
@@ -158,11 +160,12 @@ proc clear() {
 
 proc textoRtext() {
     texlab = $s1
+    sprint(texlab,"%s ",texlab) // Hack to fix bug with tex symbol at end of string
     sf = new StringFunctions()
     rlab = "expression(paste("
     while (( ind = sf.substr(texlab,"\\")) != -1) {
-        //    print texlab, "]"
-        //     print rlab, "]"
+            print texlab, "]"
+             print rlab, "]"
         sf.head(texlab,"\\\\",tmp) 
         if (sf.len(tmp)) {
             sprint(rlab,"%s\"%s\",",rlab,tmp)
