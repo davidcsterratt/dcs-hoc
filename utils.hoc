@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) { execute("strdef pkgversions") } 
-sprint(pkgversions,"%sutils = $Revision: 1.12 $, ",pkgversions)
+sprint(pkgversions,"%sutils = $Revision: 1.13 $, ",pkgversions)
 
 //
 // error(String error) 
@@ -32,66 +32,27 @@ func max() {
     if ( $1 > $2 ) { return $1 } else { return $2 }
 }
 
-
 //
-// SpikeList - list of neurons and spike times
-//
-// sl = new SpikeList("name",n) - creates SpikeList sl that contains
-//                                the times of n neurons and will write 
-//                                to a vector called "name"
-// sl.printmtimes(File f)       - print times of spikes in my matlab
-//                                [neuron_number time] format 
-// sl.times.object(i)           - The ith spike time vector
-//
-
-begintemplate SpikeList
-
-external min, max, utils_printmprefix
-public cell, clear, pos, name, times, n, printmtimes
-objref times                     // Spike time list
-strdef name
-
-proc init() { local i
-    pos = 1                     // Position -- i.e. total number 
-                                // of unprinted spikes
-    times = new List()
-    name = $s1
-    n = $2                      // Number of cells in group
-    for i = 0, n-1 { times.append(new Vector()) }
+// mean(Matrix src, Vector mean) 
+// 
+// Compute mean of columns of src storing output in mean
+// 
+proc mean() { local i
+    $o2 = new Vector($o1.ncol())
+    for i=0, $o1.ncol()-1 {
+        $o2.x(i) = $o1.getcol(i).mean()
+    }
 }
 
-proc printmtimes() { local i, j, total_size, blockend, end
-    
-    // Find out how many spikes need to be printed in total
-    total_size=0
-    for i = 0, n-1 { total_size = total_size + times.object(i).size() }
-//    printf("total_size: %g\n", total_size)
-//    printf("pos: %g\n", pos)
-
-    // Print out spikes
-    if (total_size >= 1 ) {
-        // We want blocks of 100 lines or less
-        end = pos + total_size
-        blockend = min(end, pos + 100) 
-        
-        $o1.printf("%s%s(%g:%g,:) = [ ...\n", utils_printmprefix, name, pos, blockend - 1)
-        for i=0, n-1 {
-            for j=0, times.object(i).size() - 1 {
-                $o1.printf("%4.0f %g; ... \n", i+1, times.object(i).x(j))
-                pos = pos + 1
-                // Reached the end of this block?
-                if ( pos == blockend ) { 
-                    $o1.printf("];\n") 
-                    // Reached the end of all the data?
-                    if ( pos != end ) {
-                        blockend = min(end, pos + 100) 
-                        $o1.printf("%s%s(%g:%g,:) = [ ...\n", utils_printmprefix, name, pos, blockend - 1)
-                    }
-                }
-            }
-            times.object(i).resize(0) // Clear the vector
-        }
+//
+// mean(Matrix src, Vector mean) 
+// 
+// Compute mean of columns of src storing output in mean
+// 
+proc stdev() { local i
+    $o2 = new Vector($o1.ncol())
+    for i=0, $o1.ncol()-1 {
+        $o2.x(i) = $o1.getcol(i).stdev()
     }
-} 
+}
 
-endtemplate SpikeList
