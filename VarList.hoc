@@ -4,6 +4,10 @@
 
 load_file("FormatFile.hoc")
 
+//
+// DoubleVar
+//  
+
 begintemplate DoubleVar
 
 public name, ptr, type, action
@@ -29,6 +33,9 @@ proc fprint() {
 }
 endtemplate DoubleVar
 
+//
+// StringVar
+//
 
 begintemplate StringVar
 
@@ -60,6 +67,9 @@ proc fprint() {
 
 endtemplate StringVar
 
+//
+// VarList
+// 
 
 begintemplate VarList
 
@@ -69,7 +79,7 @@ public appendString, appendSetString
 public printf, printf_actions, fprint, fprint_actions
 public save, load
 public execute_actions
-public l
+public xstatebutton, xvalue
 
 objref l, f, this, ldfile
 strdef tmpstr
@@ -138,7 +148,7 @@ proc fprint() { local i
 }
 
 proc fprint_actions() { local i
-    for i= 0, l.count()-1 { $o1.printf("%s\n",l.object(i).action) } 
+    for i= 0, l.count()-1 { $o1.printf("{%s}\n",l.object(i).action) } 
 }
 
 proc execute_actions() { local i
@@ -169,5 +179,35 @@ proc load() {
 			load_file(1, ldfile.getname)
 	}
 }
+
+func find () { local i
+    for i=0, l.count()-1 {
+        if (!strcmp(l.object(i).name,$s1)) {
+            return i
+        }
+    }
+    return -1
+}
+
+proc xstatebutton() { local ind
+    ind = find($s2)
+    if ( ind==-1 ) {
+        print this, "x statebutton(): ", $s2, " not a member of VarList"
+        stop
+    }
+    sprint(tmpstr,"xstatebutton(\"%s\",&%s,\"%s\")",$s1,$s2,l.object(ind).action)
+    execute(tmpstr)
+}
+
+proc xvalue() { local ind
+    ind = find($s2)
+    if ( ind==-1 ) {
+        print this, " xvalue(): ", $s2, " not a member of VarList"
+        stop
+    }
+    sprint(tmpstr,"xvalue(\"%s\",\"%s\",1,\"%s\")",$s1,$s2,l.object(ind).action)
+    execute(tmpstr)
+}
+
 
 endtemplate VarList
