@@ -1,4 +1,4 @@
-fprint("ReferenceAxis_ver = '$Revision: 1.2 $';\n")
+fprint("ReferenceAxis_ver = '$Revision: 1.3 $';\n")
 load_file("Segment.hoc")
 
 /*
@@ -21,7 +21,7 @@ computed for each geometric line segment and then these values are
 summed to give a total for the electrical segment.  Quantities that
 may appear in expr are:
 
-h - the projection of the centre of the line segment onto the axis
+H - the projection of the centre of the line segment onto the axis
     contained in ra (its "height").  
 l - the length of the line segment
 d - the mean diameter of the line segment    
@@ -40,18 +40,31 @@ line segment.
 
 begintemplate ReferenceAxis
 
-public base, apex, axis
-public pt3dbase, pt3dapex
+// Public variables
+
+public base, apex                       // SectionRefs of base and apex
+objref base, apex
+public axis                             // Vector joining base and apex
+objref axis 
+public verb                             // Verbose output
+
+// Public functions
+
 public setup_with_secrefs
 public apply_expr_to_segref
-public verb
-objref base, apex, pt3dbase, pt3dapex
-objref axis                             // Normaliased vector in direction of axis
+
+// Private variables
+
+objref pt3dbase, pt3dapex               // Coordinates of base and apex
+objref normaxis                         // Normalised axis
 objref r, r0                            // Final and initial points of line segments
-strdef tmpstr
 objref mean_r                           // Mean position of line segment
 objref Delta_r                          // Direction of line segment
+
 objref this
+strdef tmpstr
+
+// Function definitions
 
 proc init() {
     rp = 0                              // Relative probablity of connection in segment
@@ -85,88 +98,102 @@ proc setup_with_secrefs () {
     // axis = apex - base
     axis = pt3dapex.c                       // Copying syntax
     axis.sub(pt3dbase)
-    axis.div(sqrt(axis.sumsq()))
+    normaxis = axis.c
+    normaxis.div(sqrt(axis.sumsq()))
     
     r = new Vector(3)
     r0 =  new Vector(3)
     mean_r = new Vector(3)
     Delta_r = new Vector(3)
-
+    
 }
 
-
-
-func apply_expr_to_segref() { local s_beg s_end l s0 p i d d0 s d1seg d0seg
+func apply_expr_to_segref() { local s_beg s_end l s0 p i d d0 s d1seg d0seg 
     // args: SegRef, probexpr
 
     rp = 0                              // rp can't be local since it must be accesed by execute
-        
-    // Find out the start and end points along the segment
-    $o1.secref.sec s_beg = ($o1.x - 0.5/nseg) * L 
-    $o1.secref.sec s_end = s_beg + L/nseg
-    if (verb==1) print "s_beg, s_end: ", s_beg, s_end
-    // Now look through each geometric segment in turn
-    s = 0
-    s0 = 0                              // Old value of s
+    
     p = 0                               // Probability of synapse in segment
-    $o1.secref.sec for i=1,(n3d()-1) {
-        if (verb==1) print "coords: ", x3d(i), y3d(i), z3d(i)
+    // Find out the start and end points along the segment
+    if ( ( $o1.x != 0 ) && ($o1.x != 1) ) {
+        $o1.secref.sec s_beg = ($o1.x - 0.5/nseg) * L 
+        $o1.secref.sec s_end = s_beg + L/nseg
+        if (verb==1) print "s_beg, s_end: ", s_beg, s_end
+        // Now look through each geometric segment in turn
+        s = 0
+        s0 = 0                              // Old value of s
+        $o1.secref.sec for i=1,(n3d()-1) {
+            if (verb==1) print "coords: ", x3d(i), y3d(i), z3d(i)
+            r.x(0) = x3d(i)
+            r.x(1) = y3d(i)
+            r.x(2) = z3d(i)
+            r0.x(0) = x3d(i-1)
+            r0.x(1) = y3d(i-1)
+            r0.x(2) = z3d(i-1)
+            
+            d1 = diam3d(i)
+            d0 = diam3d(i-1)
+            
+            Delta_r = r.c
+            Delta_r.sub(r0)
+            
+            s0 = s
+            ds = sqrt(Delta_r.sumsq())
+            s = s + ds
+            
+            if (verb==1) print "s, area: ", s, s*PI*diam3d(i)
+            if (s <= s_beg) {
+                continue
+            }
+            if (s0 >= s_end) {
+                break
+            }
+            
+            l = ds                          // Length of line segment
+            
+            d0seg = d0
+            d1seg = d1
+            
+            // Begining of segment
+            if ((s>s_beg) && (s0<s_beg)) { 
+                r0.add(Delta_r.mul((s_beg-s0)/ds))
+                l = l - (s_beg - s0)
+                d0seg = d0 + (d1-d0)/ds*(s_beg - s0)
+            }
+            
+            // End of segment
+            if ((s>s_end) && (s0<s_end)) {  
+                r.sub(Delta_r.mul((s-s_end)/ds))
+                l = l - (s - s_end)
+                d1seg = d1 - (d1-d0)/ds*(s - s_end)
+            }
+            
+            mean_r = r0.c
+            mean_r.add(r)
+            mean_r.div(2)
+            mean_r.sub(pt3dbase)
+            H = mean_r.dot(normaxis)
+            d = (d0seg + d1seg)/2
+            
+            if (verb==1) print "h, d, l, area: ", H, d, l, PI*d*l
+            sprint(tmpstr,"rp += %s",$s2)
+            execute(tmpstr,this)
+            if (verb==1) print rp
+        }
+    } else {                        // x == 0 or x == 1
+        l = 0
+        if ( $o1.x == 0 ) { i = 0 }
+        if ( $o1.x == 1 ) { i = n3d()-1 }
+        d = diam3d(i)
         r.x(0) = x3d(i)
         r.x(1) = y3d(i)
         r.x(2) = z3d(i)
-        r0.x(0) = x3d(i-1)
-        r0.x(1) = y3d(i-1)
-        r0.x(2) = z3d(i-1)
         
-        d1 = diam3d(i)
-        d0 = diam3d(i-1)
-        
-        Delta_r = r.c
-        Delta_r.sub(r0)
-        
-        s0 = s
-        ds = sqrt(Delta_r.sumsq())
-        s = s + ds
-        
-        if (verb==1) print "s, area: ", s, s*PI*diam3d(i)
-        if (s <= s_beg) {
-            continue
-        }
-        if (s0 >= s_end) {
-            break
-        }
-        
-        l = ds                          // Length of line segment
-        
-        d0seg = d0
-        d1seg = d1
-        
-        // Begining of segment
-        if ((s>s_beg) && (s0<s_beg)) { 
-            r0.add(Delta_r.mul((s_beg-s0)/ds))
-            l = l - (s_beg - s0)
-            d0seg = d0 + (d1-d0)/ds*(s_beg - s0)
-        }
-        
-        // End of segment
-        if ((s>s_end) && (s0<s_end)) {  
-            r.sub(Delta_r.mul((s-s_end)/ds))
-            l = l - (s - s_end)
-            d1seg = d1 - (d1-d0)/ds*(s - s_end)
-        }
-                
-        mean_r = r0.c
-        mean_r.add(r)
-        mean_r.div(2)
-        mean_r.sub(pt3dbase)
-        h = mean_r.dot(axis)
-        
-        d = (d0seg + d1seg)/2
-        
-        if (verb==1) print "h, d, l, area: ", h, d, l, PI*d*l
-        sprint(tmpstr,"rp += %s",$s2)
+        r.sub(pt3dbase)
+        H = mean_r.dot(normaxis)
+        if (verb==1) print "h, d, l, area: ", H, d, l, PI*d*l
+        sprint(tmpstr,"rp = %s",$s2)
         execute(tmpstr,this)
-        if (verb==1) print rp
     }
     return rp
 }
