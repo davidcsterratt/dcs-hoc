@@ -2,6 +2,7 @@ load_file("FormatFile.hoc")
 
 objref vec, outfile
 objref mat
+strdef str
 chooser_test=0
 
 proc print_tests() {
@@ -35,13 +36,15 @@ proc print_tests() {
     vec.indgen(1,101,1)
     outfile.printvec("vec",vec)
     
-    
     // A matrix
     mat = new Matrix(6,101)
     for i = 0, 5 {
         mat.setrow(0, vec)
     }
     outfile.printmat("mat",mat)
+    
+    str = "blee blee blee2"
+    outfile.printstr("str",str)
      
 }    
 
