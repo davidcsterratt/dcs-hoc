@@ -1,5 +1,5 @@
 //
-// setwritepar("parameter_name", parameter_value)
+// setprintmpar("parameter_name", parameter_value)
 // 
 // set parameter of paramater_name to parameter_value and print
 // the parameter name and value to the default open file (open with 
@@ -7,7 +7,7 @@
 // 
 
 strdef utils_tmpstr
-proc setwritepar () { 
+proc setprintmpar () { 
     sprint(utils_tmpstr, "%s = %g", $s1, $2)
     execute(utils_tmpstr)
     sprint(utils_tmpstr, "fprint(\"%s = %g ;\\n\", %s )", $s1, $2, $s1)
@@ -15,7 +15,7 @@ proc setwritepar () {
 }
 
 //
-// printfvec(file_handle, vector, "vector_name")
+// printmvec(file_handle, vector, "vector_name")
 // 
 // Print vector to file_handle in matlab format with name vector_name.
 // If vector is longer than the local varible chunk_size, it is split 
@@ -23,7 +23,7 @@ proc setwritepar () {
 // continuation symbol "...".  
 // 
 
-proc printfvec () { local i, chunk_size
+proc printmvec () { local i, chunk_size
     chunk_size = 10             // How many figures per line to print
     size = $o2.size()
     $o1.printf("%s = [ ", $s3)
@@ -36,3 +36,17 @@ proc printfvec () { local i, chunk_size
     $o1.printf(" ];\n")
 }
 
+//
+// printmdouble(file_handle, double, "double_name")
+// 
+// Print double to file_handle in matlab format with name double_name.
+// If double is longer than the local varible chunk_size, it is split 
+// into lines of chunk_size elements or less, separated by the matlab line 
+// continuation symbol "...".  
+// 
+
+proc printmdouble () { 
+    $o1.printf("%s = [ ", $s3)
+    $o1.printf("%8.2f ", $2)
+    $o1.printf(" ];\n")
+}
