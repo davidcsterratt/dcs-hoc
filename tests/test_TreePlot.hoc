@@ -1,0 +1,13 @@
+load_file("TreePlot.hoc")
+
+objref tp, parents, vec
+tp = new TreePlot()
+vec = new Vector(10)
+vec.indgen(0,1)
+parents = vec.c
+parents.indgen(-1,1)
+parents.x(0) = 0
+tp.plot(vec,vec,parents)
+tp.set_xlab("time /\\mu s")
+tp.set_ylab("value /\\Omega pound")
+tp.rprintfile("/tmp/test_TreePlot.ps")
