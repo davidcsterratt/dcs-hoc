@@ -1,4 +1,5 @@
-fprint("ReferenceAxis_ver = '$Revision: 1.3 $';\n")
+if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
+sprint(pkgversions,"%sReferenceAxis = $Revision: 1.4 $, ",pkgversions)
 load_file("Segment.hoc")
 
 /*
@@ -47,10 +48,11 @@ objref base, apex
 public axis                             // Vector joining base and apex
 objref axis 
 public verb                             // Verbose output
+public adjustment
 
 // Public functions
 
-public setup_with_secrefs
+public setup_with_segrefs
 public apply_expr_to_segref
 
 // Private variables
@@ -69,11 +71,20 @@ strdef tmpstr
 proc init() {
     rp = 0                              // Relative probablity of connection in segment
     verb = 0
+    adjustment = 0
 }
 
-proc setup_with_secrefs () {
+// proc setup_with_secrefs () {
+//     $o1.secref.sec base = new SegmentRef(0)
+//     $o2.secref.sec apex = new SegmentRef(0)
+// }
+
+proc setup_with_segrefs () {
     base = $o1
     apex = $o2
+    if (numarg() == 3) {
+        adjustment = $3
+    }
     pt3dbase = new Vector()
     pt3dapex = new Vector()
     axis = new Vector()
@@ -81,17 +92,17 @@ proc setup_with_secrefs () {
     // Get the location of the base section.  We will assume that the 
     // 0th element of the line segment list is a good enough indicator 
     // of the location
-    base.sec {
-        pt3dbase.append(x3d(0))
-        pt3dbase.append(y3d(0))
-        pt3dbase.append(z3d(0))
+    base.secref.sec {
+        pt3dbase.append(x3d(base.x))
+        pt3dbase.append(y3d(base.x))
+        pt3dbase.append(z3d(base.x))
     }
 
     // Get the location of the apex segment
-    apex.sec {
-        pt3dapex.append(x3d(0))
-        pt3dapex.append(y3d(0))
-        pt3dapex.append(z3d(0))
+    apex.secref.sec {
+        pt3dapex.append(x3d(apex.x))
+        pt3dapex.append(y3d(apex.x))
+        pt3dapex.append(z3d(apex.x))
     }
     
     // Find unormalised axis
@@ -172,7 +183,7 @@ func apply_expr_to_segref() { local s_beg s_end l s0 p i d d0 s d1seg d0seg
             mean_r.add(r)
             mean_r.div(2)
             mean_r.sub(pt3dbase)
-            H = mean_r.dot(normaxis)
+            H = mean_r.dot(normaxis) + adjustment 
             d = (d0seg + d1seg)/2
             
             if (verb==1) print "h, d, l, area: ", H, d, l, PI*d*l
@@ -190,7 +201,7 @@ func apply_expr_to_segref() { local s_beg s_end l s0 p i d d0 s d1seg d0seg
         r.x(2) = z3d(i)
         
         r.sub(pt3dbase)
-        H = mean_r.dot(normaxis)
+        H = mean_r.dot(normaxis) + adjustment
         if (verb==1) print "h, d, l, area: ", H, d, l, PI*d*l
         sprint(tmpstr,"rp = %s",$s2)
         execute(tmpstr,this)
