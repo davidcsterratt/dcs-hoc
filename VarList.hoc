@@ -68,6 +68,36 @@ proc fprint() {
 endtemplate StringVar
 
 //
+// VectorVar
+// 
+
+begintemplate VectorVar
+
+public name, ptr, type, action
+public printf, fprint
+
+strdef name, cmd, action
+objref ptr, this
+
+// new Var("name")
+proc init() {
+    sprint(name,"%s",$s1)
+    sprint(cmd,"%s.ptr = %s", this, name)
+    execute1(cmd)
+    if (numarg() >= 2) {
+        sprint(action,"%s",$s2)
+    }
+}
+
+proc printf() {
+    print name, " = ", ptr.printf()
+}
+proc fprint() {
+    $o1.printvec(name, ptr)
+}
+endtemplate VectorVar
+
+//
 // VarList
 // 
 
@@ -76,6 +106,7 @@ begintemplate VarList
 public append
 public appendDouble, appendSetDouble 
 public appendString, appendSetString
+public appendVector
 public printf, printf_actions, fprint, fprint_actions
 public save, load
 public execute_actions
@@ -131,6 +162,14 @@ proc appendSetString() {
         appendString($s1,$s3)
     } else {
         appendString($s1)
+    }        
+}
+
+proc appendVector() {
+    if ( numarg() >= 2 ) {
+        l.append(new VectorVar($s1,$s2))
+    } else {
+        l.append(new VectorVar($s1))
     }        
 }
 
@@ -208,6 +247,5 @@ proc xvalue() { local ind
     sprint(tmpstr,"xvalue(\"%s\",\"%s\",1,\"%s\")",$s1,$s2,l.object(ind).action)
     execute(tmpstr)
 }
-
 
 endtemplate VarList
