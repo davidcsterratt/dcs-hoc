@@ -1,4 +1,4 @@
-fprint("utils_ver = '$Revision: 1.8 $';\n")
+fprint("utils_ver = '$Revision: 1.9 $';\n")
 
 //
 // error(String error) 
@@ -30,7 +30,7 @@ func min() {
 func max() {
     if ( $1 > $2 ) { return $1 } else { return $2 }
 }
- 
+
 //
 // setprintmpar("parameter_name", parameter_value)
 // 
@@ -45,6 +45,18 @@ proc setprintmpar () {
     execute(utils_tmpstr)
     sprint(utils_tmpstr, "fprint(\"%s = %g ;\\n\", %s )", $s1, $2, $s1)
     execute(utils_tmpstr)
+}
+
+//
+// printmdouble(file_handle, double, "double_name")
+// 
+// Print double to file_handle in matlab format with name double_name.
+// 
+
+proc printmdouble () { 
+    $o1.printf("%s = [ ", $s3)
+    $o1.printf("%g ", $2)
+    $o1.printf(" ];\n")
 }
 
 //
@@ -112,21 +124,6 @@ proc printmvec () { local i, chunk_size, start, end, total_size, pos, name, bloc
 //        $o1.printf("%g ", $o2.x(i))
 //    }
 //    $o1.printf(" ];\n")
-}
-
-//
-// printmdouble(file_handle, double, "double_name")
-// 
-// Print double to file_handle in matlab format with name double_name.
-// If double is longer than the local varible chunk_size, it is split 
-// into lines of chunk_size elements or less, separated by the matlab line 
-// continuation symbol "...".  
-// 
-
-proc printmdouble () { 
-    $o1.printf("%s = [ ", $s3)
-    $o1.printf("%8.2f ", $2)
-    $o1.printf(" ];\n")
 }
 
 objref utils_p 
