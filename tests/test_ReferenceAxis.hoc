@@ -1,0 +1,165 @@
+load_file("ReferenceAxis.hoc")
+load_file("Segment.hoc")
+
+
+// Make some points we know about.
+create soma
+soma pt3dadd(0,0,0,4)
+
+create dend
+dend pt3dadd(0,0,0,2)
+dend pt3dadd(50,0,0,2)
+dend pt3dadd(50,100,0,2)
+dend pt3dadd(50,100,200,5)
+dend nseg = 2
+
+create apex
+apex pt3dadd(50,0,0,2)
+
+
+objref ra, somaref, apexref
+soma somaref = new SectionRef()
+apex apexref = new SectionRef()
+
+ra = new ReferenceAxis()
+ra.setup_with_secrefs(somaref,apexref)
+
+totheight = 25*50 + 50 *100 + 50 *200
+
+objref dendsegs
+
+//
+// Area and length tests
+// 
+
+func test_area() { local failflag, nrnarea
+    failflag = 0
+    dend nseg = $1
+    dend dendsegs = new SegmentRefList()
+    dend dendsegs.append_internal_segments_from_section()
+    //    dendsegs.display()
+     
+    print ""
+    print "========================="
+    print "Area Test with nseg =  ", nseg
+    print "========================="
+    for i=0, dendsegs.srl.count()-1 {
+        print "-----------------------"
+        print "Calculating segment ", i
+        print "-----------------------"
+        raarea = ra.apply_expr_to_segref(dendsegs.srl.object(i),"PI*l*d")
+        ral = ra.apply_expr_to_segref(dendsegs.srl.object(i),"l")
+        nrnarea = area(dendsegs.srl.object(i).x)        
+        dend print "x, L/nseg, l, area, area(): ", dendsegs.srl.object(i).x,  L/nseg, ral,  raarea,  nrnarea
+        if (ral != L/nseg) failflag = 1
+        if (int(raarea) != int (nrnarea)) failflag = 1
+    }        
+    return failflag
+}
+fail = 0
+for i=1,10 {
+    dend fail += test_area(i)
+}
+if (fail >= 1) {
+    print "!!!!!!!!!!!!!!!!!!!!!!!!"
+    print "ERROR: Area tests failed"
+    print "!!!!!!!!!!!!!!!!!!!!!!!!"
+} else {
+    print "++++++++++++++++++++++++"
+    print "PASS: Area tests passed"
+    print "++++++++++++++++++++++++"
+}
+
+//
+// Height tests
+// 
+
+func test_height () { local failflag, nrnarea
+    failflag = 0
+    dend nseg = $1
+    dend dendsegs = new SegmentRefList()
+    dend dendsegs.append_internal_segments_from_section()    
+    //    dendsegs.display()p
+     
+    print ""
+    print "========================="
+    print "Height Test with nseg =  ", nseg
+    print "========================="
+    totraheight = 0
+    for i=0, dendsegs.srl.count()-1 {
+        raheight = ra.apply_expr_to_segref(dendsegs.srl.object(i),"h*l")
+        dend print "x, h: ", dendsegs.srl.object(i).x, raheight
+        totraheight += raheight
+    }
+    // We check that the calculated l*h is the same as obtained by ra
+    print "totraheight, totheight", totraheight, totheight
+    if (totraheight != totheight) {
+        failflag = 1
+    }
+    return failflag
+}
+
+fail = 0
+for i=1,10 {
+    dend fail += test_height(i)
+}
+
+if (fail >= 1) {
+    print "!!!!!!!!!!!!!!!!!!!!!!!!"
+    print "ERROR: Height tests failed"
+    print "!!!!!!!!!!!!!!!!!!!!!!!!"
+} else {
+    print "++++++++++++++++++++++++"
+    print "PASS: Height tests passed"
+    print "++++++++++++++++++++++++"
+}
+
+
+func test_height_shift () { local failflag, nrnarea,     totheightshift
+        
+    // Check for moving the base in the direction of the axis
+    soma pt3dclear()
+    soma pt3dadd(-50,0,0,4)
+    ra.setup_with_secrefs(somaref,apexref)
+    totheightshift = 25*50 + 50 *100 + 50 *200 + 50*350
+
+    failflag = 0
+    dend nseg = $1
+    dend dendsegs = new SegmentRefList()
+    dend dendsegs.append_internal_segments_from_section()    
+    //    dendsegs.display()p
+     
+    print ""
+    print "========================="
+    print "Shift Height Test with nseg =  ", nseg
+    print "========================="
+    totraheight = 0
+    for i=0, dendsegs.srl.count()-1 {
+        raheight = ra.apply_expr_to_segref(dendsegs.srl.object(i),"h*l")
+        dend print "x, h: ", dendsegs.srl.object(i).x, raheight
+        totraheight += raheight
+    }
+    // We check that the calculated l*h is the same as obtained by ra
+    print "totraheight, totheightshift", totraheight, totheightshift
+    if (totraheight != totheightshift) {
+        failflag = 1
+    }
+    return failflag
+
+}
+
+fail = 0
+for i=1,10 {
+    dend fail += test_height_shift(i)
+}
+
+
+if (fail >= 1) {
+    print "!!!!!!!!!!!!!!!!!!!!!!!!"
+    print "ERROR: Height tests failed"
+    print "!!!!!!!!!!!!!!!!!!!!!!!!"
+} else {
+    print "+++++++++++++++++++++++++++++++"
+    print "PASS: Shift height tests passed"
+    print "+++++++++++++++++++++++++++++++"
+}
