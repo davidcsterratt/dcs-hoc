@@ -1,4 +1,5 @@
-fprint("ExpSynStim_ver = '$Revision: 1.3 $';\n")
+if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
+sprint(pkgversions,"%sExpSynStim = $Revision: 1.4 $, ",pkgversions)
 
 /*
 
