@@ -1,9 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sVarList = $Revision: 1.9 $, ",pkgversions)
-
-//
-// TODO: implement units setting using the units command.
-// 
+sprint(pkgversions,"%sVarList = $Revision: 1.10 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
 
@@ -25,6 +21,10 @@ proc init() {
     ptr = new Pointer(name)
     if (numarg() >= 2) {
         sprint(action,"%s",$s2)
+    }
+    if (numarg() >= 3) {
+        sprint(tmpstr,"units(&%s,\"%s\")",name,$s3)
+        execute(tmpstr)
     }
 }
 
@@ -167,22 +167,18 @@ proc append() {
 }
 
 proc appendDouble() {
-    if ( numarg() >= 2 ) {
-        l.append(new DoubleVar($s1,$s2))
-    } else {
-        l.append(new DoubleVar($s1))
-    }
+    if (numarg() == 3) { l.append(new DoubleVar($s1, $s2, $s3)) }
+    if (numarg() == 2) { l.append(new DoubleVar($s1, $s2)) }
+    if (numarg() == 1) { l.append(new DoubleVar($s1)) }
 }
     
 
 proc appendSetDouble() {
     sprint(tmpstr,"%s = %g",$s1, $2)
     execute1(tmpstr)
-    if ( numarg() >= 3 ) {
-        appendDouble($s1,$s3)
-    } else {
-        appendDouble($s1)
-    }
+    if (numarg() == 4) { appendDouble($s1, $s3, $s4) }
+    if (numarg() == 3) { appendDouble($s1, $s3) }
+    if (numarg() == 2) { appendDouble($s1) }
 }
 
 
