@@ -1,11 +1,11 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sTreePlot = $Revision: 1.2 $, ",pkgversions)
+sprint(pkgversions,"%sTreePlot = $Revision: 1.3 $, ",pkgversions)
 
 load_file("TreePlot.hoc")
 load_file("RPlot.hoc")
 
 begintemplate TreePlotArray
-public glist, cellref, rplot
+public glist, cellref, rprintfile
 
 objref vb
 objref hblist
@@ -39,9 +39,9 @@ proc cellref() {
     $o1 = glist.object($2*cols + $3)
 }
 
-proc rplot() { local i, j
+proc rprintfile() { local i, j
     rp = new RPlot(rfilename)
-    rp.start_plot("/tmp/TreePlotArray.ps")
+    rp.start_plot($s1)
     rp.set_mfrow(rows,cols)
     for i=0,rows-1 {
         for j = 0,cols-1 {
