@@ -1,29 +1,37 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sRPlot = $Revision: 1.1 $, ",pkgversions)
+sprint(pkgversions,"%sRPlot = $Revision: 1.2 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
 load_file("utils.hoc")
 
 begintemplate RPlot
-public add_graph
+public start_plot, add_graph, end_plot
 public run
 public plot
 public clear
+public set_mfrow
+
 
 objref xvec, yvec
 objref xveclist, yveclist
 objref rfile
+strdef rfilename
 objref li, lilist
 strdef xlab, ylab
+strdef cmd
+objref oc
 
 proc init() {
     xvec = new Vector()
     yvec = new Vector()
     li = new Vector()
-    xveclist = new List()
-    yveclist = new List()
-    lilist = new List()
-    rfile = new FormatFile("/tmp/rfile","R")
+    if (numarg() == 1) {
+        rfilename = $s1 
+    } else {
+        rfilename = "/tmp/rfile"
+    }
+    rfile = new FormatFile(rfilename,"R")
+    oc = new ObjectClass()
 }
 
 func getline() { local i 
@@ -32,16 +40,33 @@ func getline() { local i
     return i
 }
 
+proc set_mfrow() {
+    rfile.aopen()
+    rfile.f.printf("par(mfrow=c(%g,%g))\n",$1,$2)
+    rfile.close()
+}
+
+proc start_plot() {
+    rfile.wopen()
+    rfile.f.printf("postscript(file=\"%s\")\n",$s1)    
+    rfile.close()
+    
+}
+
 // add_graph(Graph g, String filename, String xlabel, String ylabel) 
 proc add_graph() {
     xlab = ""
     ylab = ""
-    if (numarg() >= 3) { xlab = $s3 }
-    if (numarg() >= 4) { ylab = $s4 }
+    if (numarg() >= 2) { xlab = $s2 }
+    if (numarg() >= 3) { ylab = $s3 }
+    
+    xveclist = new List()
+    yveclist = new List()
+    lilist = new List()
+    
     for ( i=-1; ( i = getline(i, $o1)) != -1 ; ) {
         // xvec and yvec contain the line with Graph internal index i.
         // and can be associated with the sequential index j.
-        print  i, yvec.label
         xveclist.append(xvec.c)
         yveclist.append(yvec.cl)
         lilist.append(li.c)
@@ -53,34 +78,50 @@ proc add_graph() {
         ymin = $o1.view_info(vi,7)
         ymax = $o1.view_info(vi,8)
     }
-    rfile.wopen()
+    
+    rfile.aopen()
     rfile.print_VectorList("xvec",xveclist)
     rfile.print_VectorList("yvec",yveclist)
     rfile.print_VectorList("li",lilist)
-    rfile.printf("postscript(file=\"%s\")\n",$s2)
+
     if (vi != -1) {
         rfile.f.printf("plot(NA,NA,xlim=c(%g,%g),ylim=c(%g,%g),xlab=\"%s\",ylab=\"%s\")\n",xmin,xmax,ymin,ymax,xlab,ylab) 
     } else {
         rfile.printf("plot(NA,NA,")
         rfile.printf("xlim=c(min(sapply(xvec,min)),max(sapply(xvec,max))),                            ylim=c(min(sapply(yvec,min)),max(sapply(yvec,max))),")
-        rfile.f.printf("xlab=\"%s\",ylab=\"%s\")",xlab,ylab)
+        rfile.f.printf("xlab=\"%s\",ylab=\"%s\")\n",xlab,ylab)
     }
     rfile.printf("\
     for (i in 1:length(xvec)) {\
         lines(xvec[[i]],yvec[[i]],col=li[[i]][1])\
-    }\
-    dev.off()")
+    }\n")
+    if (oc.object_is($o1,"TreePlot")) {
+        for ( i=-1; ( i = $o1.getmarks(i, xvec, yvec)) != -1 ; ) {
+            rfile.printvec("xvec",xvec)
+            rfile.printvec("yvec",yvec)
+            rfile.printf("points(xvec,yvec)\n")
+        }
+    }
+    rfile.close()
+}
+
+proc end_plot() {
+    rfile.aopen()
+    rfile.printf("dev.off()\n")
     rfile.close()
 }
 
 proc run() {
-    system("R BATCH /tmp/rfile.R")
+    sprint(cmd,"R BATCH %s.R", rfilename)
+    system(cmd)
 }
 
 // plot(Graph g, String name) 
 proc plot() {
     clear()
-    add_graph($o1, $s2)
+    start_plot($s2)
+    add_graph($o1)
+    end_plot()
     run()
 }
 
