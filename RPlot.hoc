@@ -1,0 +1,91 @@
+if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
+sprint(pkgversions,"%sRPlot = $Revision: 1.1 $, ",pkgversions)
+
+load_file("FormatFile.hoc")
+load_file("utils.hoc")
+
+begintemplate RPlot
+public add_graph
+public run
+public plot
+public clear
+
+objref xvec, yvec
+objref xveclist, yveclist
+objref rfile
+objref li, lilist
+strdef xlab, ylab
+
+proc init() {
+    xvec = new Vector()
+    yvec = new Vector()
+    li = new Vector()
+    xveclist = new List()
+    yveclist = new List()
+    lilist = new List()
+    rfile = new FormatFile("/tmp/rfile","R")
+}
+
+func getline() { local i 
+    $o2.line_info($1, li)
+    i = $o2.getline($1, xvec, yvec)
+    return i
+}
+
+// add_graph(Graph g, String filename, String xlabel, String ylabel) 
+proc add_graph() {
+    xlab = ""
+    ylab = ""
+    if (numarg() >= 3) { xlab = $s3 }
+    if (numarg() >= 4) { ylab = $s4 }
+    for ( i=-1; ( i = getline(i, $o1)) != -1 ; ) {
+        // xvec and yvec contain the line with Graph internal index i.
+        // and can be associated with the sequential index j.
+        print  i, yvec.label
+        xveclist.append(xvec.c)
+        yveclist.append(yvec.cl)
+        lilist.append(li.c)
+    }
+    vi = $o1.view_info()
+    if (vi != -1) {
+        xmin = $o1.view_info(vi,5)
+        xmax = $o1.view_info(vi,6)
+        ymin = $o1.view_info(vi,7)
+        ymax = $o1.view_info(vi,8)
+    }
+    rfile.wopen()
+    rfile.print_VectorList("xvec",xveclist)
+    rfile.print_VectorList("yvec",yveclist)
+    rfile.print_VectorList("li",lilist)
+    rfile.printf("postscript(file=\"%s\")\n",$s2)
+    if (vi != -1) {
+        rfile.f.printf("plot(NA,NA,xlim=c(%g,%g),ylim=c(%g,%g),xlab=\"%s\",ylab=\"%s\")\n",xmin,xmax,ymin,ymax,xlab,ylab) 
+    } else {
+        rfile.printf("plot(NA,NA,")
+        rfile.printf("xlim=c(min(sapply(xvec,min)),max(sapply(xvec,max))),                            ylim=c(min(sapply(yvec,min)),max(sapply(yvec,max))),")
+        rfile.f.printf("xlab=\"%s\",ylab=\"%s\")",xlab,ylab)
+    }
+    rfile.printf("\
+    for (i in 1:length(xvec)) {\
+        lines(xvec[[i]],yvec[[i]],col=li[[i]][1])\
+    }\
+    dev.off()")
+    rfile.close()
+}
+
+proc run() {
+    system("R BATCH /tmp/rfile.R")
+}
+
+// plot(Graph g, String name) 
+proc plot() {
+    clear()
+    add_graph($o1, $s2)
+    run()
+}
+
+proc clear() {
+    rfile.unlink()
+}
+        
+endtemplate RPlot
