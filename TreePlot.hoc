@@ -1,5 +1,7 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sTreePlot = $Revision: 1.8 $, ",pkgversions)
+sprint(pkgversions,"%sTreePlot = $Revision: 1.9 $, ",pkgversions)
+
+load_file("RPlot.hoc")
 
 begintemplate TreePlot
 
@@ -10,11 +12,15 @@ public graph, xvec, yvec, diamvec, parentsvec, view, size
 public view_equal_plot, auto_limits_on, set_limits, get_limit
 public set_xlab, get_xlab
 public set_ylab, get_ylab
+public rprintfile
+public rp
 
 objref graph, xvec, yvec, diamvec, parentsvec
 objref tmpxvec, tmpyvec
 objref xmarklist, ymarklist
 strdef xlab, ylab
+objref rp
+objref this
 
 double manual_limits[4]
 double auto_limits[4]
@@ -147,5 +153,15 @@ proc set_xlab() { xlab = $s1 }
 proc get_xlab() { $s1 = xlab }
 proc set_ylab() { ylab = $s1 } 
 proc get_ylab() { $s1 = ylab }
+
+// rprintfile(String epsfilename, Double SaveFile)
+proc rprintfile() { local i, j
+    if (numarg() == 1) { rp = new RPlot() }
+    if ((numarg() == 2) && ($2 != 0)) { rp = new RPlot($s1) }
+    rp.start_plot($s1)
+    rp.add_graph(this)
+    rp.end_plot()
+    rp.run()
+}
 
 endtemplate TreePlot
