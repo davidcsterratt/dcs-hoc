@@ -1,4 +1,4 @@
-fprint("utils_ver = '$Revision: 1.7 $';\n")
+fprint("utils_ver = '$Revision: 1.8 $';\n")
 
 //
 // error(String error) 
@@ -60,8 +60,10 @@ proc setprintmpar () {
 // Same as above, but only print from index start to index end
 //
 
-proc printmvec () { local i, chunk_size, start, end
+proc printmvec () { local i, chunk_size, start, end, total_size, pos, name, blockend
     chunk_size = 10             // How many figures per line to print
+    pos = 1                     // Position -- i.e. total number 
+                                // of unprinted spikes
 
     if (numarg() == 3) {
         start = 0 
@@ -73,16 +75,43 @@ proc printmvec () { local i, chunk_size, start, end
         if (end != int(end)) { error("utils.hoc:printmvec(): end value is not an integer") }
         if (end < start ) { error("utils.hoc:printmvec(): end value is lower than start value") }
     }
-
-//    print start, end
-    $o1.printf("%s = [ ", $s3)
-    for i = start, end {
-        $o1.printf("%8.2f ", $o2.x(i))
-        if ( ( ( i + 1 ) % chunk_size ) == 0 ) {
-            $o1.printf(" ...\n") 
+    
+    // Find out how many values need to be printed in total
+    total_size = $o2.size() 
+    //    printf("total_size: %g\n", total_size)
+    //    printf("pos: %g\n", pos)
+    
+    // Print out values
+    if (total_size >= 1 ) {
+        // We want blocks of 100 lines or less
+        end = pos + total_size
+        blockend = min(end, pos + 100) 
+        
+        $o1.printf("%s(%g:%g) = [ ...\n", $s3, pos, blockend - 1)
+        for j=0, $o2.size() - 1 {
+            $o1.printf("%g ", $o2.x(j))
+            if ( ( ( j + 1 ) % chunk_size ) == 0 ) {
+                $o1.printf(" ...\n") 
+            }
+            pos = pos + 1
+            // Reached the end of this block?
+            if ( pos == blockend ) { 
+                $o1.printf("];\n") 
+                // Reached the end of all the data?
+                if ( pos != end ) {
+                    blockend = min(end, pos + 100) 
+                    $o1.printf("%s(%g:%g) = [ ...\n", $s3, pos, blockend - 1)
+                }
+            }
         }
     }
-    $o1.printf(" ];\n")
+
+//    print start, end
+//    $o1.printf("%s = [ ", $s3)
+//    for i = start, end {
+//        $o1.printf("%g ", $o2.x(i))
+//    }
+//    $o1.printf(" ];\n")
 }
 
 //
@@ -98,67 +127,6 @@ proc printmdouble () {
     $o1.printf("%s = [ ", $s3)
     $o1.printf("%8.2f ", $2)
     $o1.printf(" ];\n")
-}
-
-//
-// printmspiketimes(File f, List spiketimes, String spiketimes)
-//
-// Print list of vectors of spike times spiketimes to array matlab 
-// format with each line of the array being in the form 
-// neuron_number, spike_time.  
-// The neuron_number allocated is the array index + 1.  The string 
-// spiketimes is the name of the matlab array printed to.  
-// n specifies the size of the array
-//
-
-proc printmspiketimes() { local i, j, total_size, pos, n
-    n = $o2.count()
-    // Create the variable "printmspiketims_spiketimes_pos") if 
-    // it doesn't exist
-    sprint(utils_tmpstr,"printmspiketimes_%s_pos",$s3)
-    if( !name_declared(utils_tmpstr) ) {
-        sprint(utils_tmpstr,"printmspiketimes_%s_pos = 1",$s3)
-        execute1(utils_tmpstr) 
-    }
-    sprint(utils_tmpstr,"pos = printmspiketimes_%s_pos",$s3)
-    print utils_tmpstr
-    execute1(utils_tmpstr)
-    print "pos:", pos, " total_size:", total_size 
-    sprint(utils_tmpstr,"print \"printmspiketimes_%s_pos:\", printmspiketimes_%s_pos", $s3, $s3)
-    execute1(utils_tmpstr)
-    
-    // Find out how many spikes need to be printed in total
-    total_size=0
-    for i = 0, n-1 { total_size = total_size + $o2.object(i).size() }
-    // Print out spikes
-    if (total_size >= 1 ) {
-        // We want blocks of 100 lines or less
-        end = pos + total_size
-        blockend = min(end, pos + 100) 
-        sprint(utils_tmpstr,"%s(%g:%g,:) = [ ...\n", $s3, pos, blockend - 1)
-        $o1.printf("%s",utils_tmpstr)
-        for i=0, n-1 {
-            for j=0, $o2.object(i).size() - 1 {
-                $o1.printf("%4.0f %g; ... \n", i, $o2.object(i).x(j))
-                pos = pos + 1
-                // Reached the end of this block?
-                if ( pos == blockend ) { 
-                    $o1.printf("];\n") 
-                    // Reached the end of all the data?
-                    if ( pos != end ) {
-                        blockend = min(end, pos + 100) 
-                        sprint(utils_tmpstr,"%s(%g:%g,:) = [ ...\n", $s3, pos, blockend - 1)
-                        $o1.printf("%s",utils_tmpstr)
-                    }
-                }
-            }
-            $o2.object(i).resize(0) // Clear the vector
-        }
-    } 
-    
-    // Read the pos information back to the static variable
-    sprint(utils_tmpstr,"printmspiketimes_%s_pos = pos",$s3)
-    execute1(utils_tmpstr)
 }
 
 objref utils_p 
