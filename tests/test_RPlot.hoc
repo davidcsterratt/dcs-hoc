@@ -1,5 +1,4 @@
 load_file("RPlot.hoc")
-load_file("TreePlotArray.hoc")
 
 objref g, vec
 g = new Graph()
@@ -15,9 +14,13 @@ objref rp
 rp = new RPlot("/tmp/test_RPlot")
 rp.set_width(4)
 rp.set_height(4)
-rp.start_plot("/tmp/test_RPlot.ps")
-rp.add_graph(g,"x","y")
-rp.end_plot()
-rp.run()
+rp.plot(g,"/tmp/test_RPlot.ps","x /\\mu m","\\xi")
 
 
+// Voltage axis
+create soma
+soma insert hh
+access soma
+// Now bring up a voltage axis 
+// run()
+// rp.plot(Graph[1],"/tmp/voltage_plot.ps")
