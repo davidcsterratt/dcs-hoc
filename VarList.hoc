@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sVarList = $Revision: 1.7 $, ",pkgversions)
+sprint(pkgversions,"%sVarList = $Revision: 1.8 $, ",pkgversions)
 
 //
 // TODO: implement units setting using the units command.
@@ -245,6 +245,9 @@ proc execute_actions() { local i
     for i= 0, l.count()-1 { execute(l.object(i).action) } 
 }
 
+// save()                brings up chooser
+// save("filename.hoc")  saves to "filename.hoc"
+// save("","dir")        brings up chooser starting in "dir"
 proc save() {
     if ((numarg() == 0) || numarg() == 2) {
         f = new FormatFile("","hoc")
@@ -264,6 +267,9 @@ proc save() {
 }
 
 // Procedure to load from file adapted from stdrun.hoc
+// load()                brings up chooser
+// load("filename.hoc")  loads "filename.hoc"
+// load("","dir")        brings up chooser starting in "dir"
 proc load() {
     path = "."
     if (numarg() == 2) {
