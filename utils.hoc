@@ -1,3 +1,11 @@
+//
+// setwritepar("parameter_name", parameter_value)
+// 
+// set parameter of paramater_name to parameter_value and print
+// the parameter name and value to the default open file (open with 
+// IO-wopen().
+// 
+
 strdef utils_tmpstr
 proc setwritepar () { 
     sprint(utils_tmpstr, "%s = %g", $s1, $2)
@@ -5,3 +13,18 @@ proc setwritepar () {
     sprint(utils_tmpstr, "fprint(\"%s = %g ;\\n\", %s )", $s1, $2, $s1)
     execute(utils_tmpstr)
 }
+
+//
+// printfvec(file_handle, vector, "vector_name")
+// 
+// print vector_name to file_handle in matlab format
+// 
+
+proc printfvec () { local n
+    $o1.printf("%s = [ ", $s3)
+    //    sprint(utils_tmpstr2, "%s.printf($o1, \"8.2f \")", $s2)
+    //    execute(utils_tmpstr2)
+    n = $o2.printf($o1, "%8.2f ")
+    $o1.printf(" ];\n")
+}
+
