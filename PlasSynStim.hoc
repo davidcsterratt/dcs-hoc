@@ -1,3 +1,5 @@
+fprint("PlasSynStimVer = '$Revision: 1.2 $'")
+
 begintemplate PlasSynStim
 public loc, get_loc, get_distance
 public ps, netstim, ncf, ncb
