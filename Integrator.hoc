@@ -1,0 +1,31 @@
+if (name_declared("pkgversions") != 4 ) { execute("strdef pkgversions") } 
+sprint(pkgversions,"%sIntegrator = $Revision: 1.1 $, ",pkgversions)
+
+//
+// integral(Vector y, Vector x)
+//
+// Numerical integration using trapezoid rule
+//
+
+begintemplate Integrator
+public integrate
+
+objref x0, x1, ybar, dx
+
+proc init() {
+    x0 = new Vector()
+    x1 = new Vector()
+    dx = new Vector()
+    ybar = new Vector()
+}
+
+func integrate () {
+    x0.indgen(0, $o2.size()-2,1)
+    x1.indgen(1, $o2.size()-1,1)
+    ybar = $o1.ind(x0) 
+    ybar.add($o1.ind(x1))
+    dx.deriv($o2,1,1) 
+    return ybar.dot(dx)/2
+}
+
+endtemplate Integrator
