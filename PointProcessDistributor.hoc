@@ -1,4 +1,5 @@
-fprint("PointProcessDistributor_ver = '$Revision: 1.2 $';\n")
+if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
+sprint(pkgversions,"%sPointProcessDistributor = $Revision: 1.3 $, ",pkgversions)
 
 /*
 PointProcessDistributor
