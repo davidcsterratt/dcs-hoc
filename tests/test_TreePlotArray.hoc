@@ -28,4 +28,4 @@ for i=0,1 {
     }
 }
 
-tpa1.rplot("/tmp/test_TreePlotArray.ps")
+tpa1.rprintfile("/tmp/test_TreePlotArray.ps")
