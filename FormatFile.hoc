@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sFormatFile = $Revision: 1.7 $, ",pkgversions)
+sprint(pkgversions,"%sFormatFile = $Revision: 1.8 $, ",pkgversions)
 
 /*
 
@@ -93,6 +93,7 @@ public printstr
 public setprintdouble
 public setprintstr
 public printf
+public chooser
 
 // Private variables
 
@@ -114,7 +115,7 @@ strdef quot
 
 strdef tmpstr, rowstr, varname
 
-objref tmpmat
+objref tmpmat, this
 
 proc init() {
     // Args: Filename, Format (R or matlab), structur prefix
@@ -156,12 +157,12 @@ proc init() {
         sprint(filename,"%s.R",$s1)
     }
     if (!strcmp(format, "hoc")) {
-        openind = "["
-        closeind = "]"
+        openind = ""
+        closeind = ""
         assop = "="
-        openvec = "c("
-        elsep = ","
-        closevec = ")"
+        openvec = ""
+        elsep = " "
+        closevec = ""
         linecont = ""
         lineend = ""
         quot="\""
@@ -295,7 +296,12 @@ proc printvec() {
     if (!strcmp(format, "R")) {
         f.printf("%s <- c()%s\n",varname,lineend)
     }
-    printvec_generic(varname, $o2) 
+    
+    if (!strcmp(format, "hoc")) {
+        printvec_hoc(varname, $o2) 
+    } else {
+        printvec_generic(varname, $o2) 
+    }
     
 }
 
@@ -338,6 +344,14 @@ proc printvec_generic () { local i, chunk_size,  total_size, pos, name, blockend
         
         // Print end of vector
         f.printf("%s%s\n",closevec,lineend) 
+    }
+}
+
+proc printvec_hoc() { local i
+    f.printf("objref %s\n", $s1)
+    f.printf("%s = new Vector(%g)\n", $s1, $o2.size())
+    for i=0, $o2.size()-1 {
+        f.printf("%s.x(%g) = %g\n",$s1, i, $o2.x(i))
     }
 }
 
@@ -457,6 +471,19 @@ proc setprintstr () {
 
 proc printf() {
     f.printf($s1,$s2) 
+}
+
+proc chooser() { local i 
+    sprint(tmpstr,"f.chooser(")
+    for i=1,numarg() {
+        if (i>=2) { 
+            sprint(tmpstr,"%s,", tmpstr)
+        }
+        sprint(tmpstr,"%s\"%s\"", tmpstr, $si)
+    } 
+    sprint(tmpstr,"%s)",tmpstr)
+    execute(tmpstr,this)
+    filename = f.getname()
 }
 
 endtemplate FormatFile
