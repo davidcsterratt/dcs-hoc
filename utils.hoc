@@ -1,3 +1,36 @@
+fprint("utils_ver = '$Revision: 1.5 $';\n")
+
+//
+// error(String error) 
+//
+// Issue error string and stop simulation
+//
+
+proc error() {
+    print $s1
+    stop
+}
+
+//
+// x = min(double a, double b)
+// 
+// return minimum of a and b
+//
+
+func min() {
+    if ( $1 < $2 ) { return $1 } else { return $2 }
+}
+
+//
+// x = max(double a, double b)
+// 
+// return maximum of a and b
+//
+
+func max() {
+    if ( $1 > $2 ) { return $1 } else { return $2 }
+}
+ 
 //
 // setprintmpar("parameter_name", parameter_value)
 // 
@@ -22,12 +55,28 @@ proc setprintmpar () {
 // into lines of chunk_size elements or less, separated by the matlab line 
 // continuation symbol "...".  
 // 
+// printmvec(file_handle, vector, "vector_name", start, end)
+// 
+// Same as above, but only print from index start to index end
+//
 
-proc printmvec () { local i, chunk_size
+proc printmvec () { local i, chunk_size, start, end
     chunk_size = 10             // How many figures per line to print
-    size = $o2.size()
+
+    if (numarg() == 3) {
+        start = 0 
+        end = $o2.size() - 1 
+    } else {
+        start = $4
+        end = $5
+        if (start != int(start)) { error("utils.hoc:printmvec(): start value is not an integer")}
+        if (end != int(end)) { error("utils.hoc:printmvec(): end value is not an integer") }
+        if (end < start ) { error("utils.hoc:printmvec(): end value is lower than start value") }
+    }
+
+    print start, end
     $o1.printf("%s = [ ", $s3)
-    for i = 0, (size - 1) {
+    for i = start, end {
         $o1.printf("%8.2f ", $o2.x(i))
         if ( ( ( i + 1 ) % chunk_size ) == 0 ) {
             $o1.printf(" ...\n") 
