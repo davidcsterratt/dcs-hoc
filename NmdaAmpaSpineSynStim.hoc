@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sNmdaAmpaSpineSynStim = $Revision: 1.2 $, ",pkgversions)
+sprint(pkgversions,"%sNmdaAmpaSpineSynStim = $Revision: 1.3 $, ",pkgversions)
 
 load_file("SimpleSpine.hoc")
 
@@ -21,8 +21,7 @@ public ampasyn, nmdasyn, netcon, nmdanetcon, netstim, spine
 objref ampasyn, nmdasyn, netcon, nmdanetcon, netstim, spine 
 
 proc init() {
-    if (numarg() == 1) { spine = new SimpleSpine(0.5) }
-    if (numarg() == 2) { spine = new SimpleSpine(0.5, $2) }
+    spine = new SimpleSpine($1) 
     spine.head {
         ampasyn = new AmpaSyn(0.5)
         nmdasyn = new NmdaSyn(0.5)
