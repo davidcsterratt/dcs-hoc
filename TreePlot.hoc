@@ -1,16 +1,20 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sTreePlot = $Revision: 1.6 $, ",pkgversions)
+sprint(pkgversions,"%sTreePlot = $Revision: 1.7 $, ",pkgversions)
 
 begintemplate TreePlot
 
-objref graph, xvec, yvec, diamvec, parentsvec
-objref tmpxvec, tmpyvec
-objref xmarklist, ymarklist
 public plot, lines, marks
 public getline, line_info, view_info
 public getmarks
 public graph, xvec, yvec, diamvec, parentsvec, view, size
 public view_equal_plot, auto_limits_on, set_limits
+public set_xlab, get_xlab
+public set_ylab, get_ylab
+
+objref graph, xvec, yvec, diamvec, parentsvec
+objref tmpxvec, tmpyvec
+objref xmarklist, ymarklist
+strdef xlab, ylab
 
 double manual_limits[4]
 double auto_limits[4]
@@ -32,6 +36,8 @@ proc init() { local i
     lines_flag=1
     marks_flag=0
     for i=0,3 { auto_flag[i] = 1 }
+    xlab = ""
+    ylab = ""
 }
 
 proc plot() { local i
@@ -132,5 +138,10 @@ proc view_equal_plot() { local i
     }
     size(limits[0], limits[1], limits[2], limits[3])
 }
+
+proc set_xlab() { xlab = $s1 } 
+proc get_xlab() { $s1 = xlab }
+proc set_ylab() { ylab = $s1 } 
+proc get_ylab() { $s1 = ylab }
 
 endtemplate TreePlot
