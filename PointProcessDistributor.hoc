@@ -1,0 +1,142 @@
+fprint("PointProcessDistributor_ver = '$Revision: 1.1 $';\n")
+
+/*
+PointProcessDistributor
+
+ppd = new PointProcessDistributor(SectionList)
+ppd.loc(PointProcess)
+
+relocates the PointProcess to a random location with respect to
+uniform distribution based on position.
+SectionList defines the set of sections to sample.
+PointProcess must have a loc() member function.
+There must be a default section declared to measure distance from.
+*/
+
+begintemplate PointProcessDistributor
+
+public loc, distribute_array, setup
+public total_length, dist, lengths, relprob
+objectvar seclist, ran 	
+strdef distexpr                 // The expression of the distribution as a string
+strdef tmpstr
+objref lengths                  // Lengths of each segment
+objref relprob                  // Relative probability of pp in segment
+objref this                     // Self-pointer
+objref RP                       // Vector to store culumulative relative prob
+
+proc init() { 
+    ran = new Random($1)
+    d = 0
+    l = 0 
+    rp = 0
+}
+
+proc setup() { local ltot, a
+    this = $o1
+    seclist = $o2
+    distexpr = $s3
+
+    lengths = new Vector()
+    relprob = new Vector()
+
+    total_length = 0
+
+    // Traverse the tree
+    forsec seclist { 
+        l = 0
+        ltot = 0
+        // Look at each segment in the section
+        for ( x ) {
+            // Don't look at the beginning or end of the section 
+            if ( (x == 0) || (x == 1) ) {
+                continue
+            }
+            // Otherwise, the relative length is given by 
+            l = 2 * ( x*L - ltot ) 
+            ltot = ltot + l
+            
+
+            // Store for future reference
+            lengths.append(l)
+            d = distance(x)
+            // Calculate and store the relative 
+            sprint(tmpstr,"rp = (%s)*l",distexpr)
+            // print tmpstr
+            // sprint(tmpstr,"rp = d")
+            // a = ((d<500) && (d>100))
+            // print a
+            execute(tmpstr,this)
+            //            if (d > 500) { print d, rp}
+
+            // print rp
+            relprob.append(rp)
+//            if (!strcmp("apical[72]",secname())){  
+//                print x, distance(x), rp, (relprob.size() -1)
+//            }
+
+        }
+    }
+}
+
+// distribute_array("array_name",array_size)
+func distribute_array () { local  i, N
+    N = $2
+    if ( relprob.sum() == 0 ) { 
+        print "PointProcessDistributor: Warning: No synapses fall in the range specified"
+        return 0
+    }
+    ran.uniform(0, relprob.sum() )
+    RP = new Vector($2)
+    RP.setrand(ran)
+    RP.sort()
+    RPind = 0
+    relprobind = 0
+    culmrelprob = 0 
+    
+    // Traverse the tree
+    forsec seclist { 
+        // Look at each segment in the section
+        for ( x ) {
+            // Don't look at the beginning or end of the section 
+            if ( (x == 0) || (x == 1) ) {
+                continue
+            }
+            
+            // Add the probablilty for this segment to the culumuative 
+            // probability distribution and increment the counter 
+//            print relprobind, relprob.size()
+            culmrelprob = culmrelprob + relprob.x(relprobind)
+            relprobind = relprobind + 1
+            
+            // Has the culmulative distribution exceeded the 
+            // culmulative values for any synapses we want to add?
+//            print "1:", RPind, RP.size()
+            while ( RP.x(RPind) < culmrelprob ) {
+                sprint(tmpstr,"%s[%g].loc(%g)",$s1,RPind,x)
+                d = distance(x)
+//                print tmpstr, secname(), relprobind-1, relprob.x(relprobind-1)
+                execute(tmpstr)
+                // if (RPind < (N-1)) {
+                RPind = RPind + 1 
+//                print "2:", RPind, RP.size()
+                if (RPind == N) { break }
+//                print "2a:", RPind, RP.size()
+            }
+//            print "3a:", RPind, RP.size()
+            if (RPind == N) { break }
+//            print "3:", RPind, RP.size()
+        }
+        if (RPind == N) { break }        
+    }
+    return(1)
+}
+
+endtemplate PointProcessDistributor
+
+// distribute_pp("arrname",n,"distexpr")
+
+//proc distribute_pp {
+
+
+
