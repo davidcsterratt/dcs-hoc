@@ -1,8 +1,8 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sVarList = $Revision: 1.12 $, ",pkgversions)
+sprint(pkgversions,"%sVarList = $Revision: 1.13 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
-load_file("utils.hoc")
+load_file("ObjectClass.hoc")
 
 //
 // DoubleVar
