@@ -1,18 +1,32 @@
 load_file("TreePlot.hoc")
 
-objref tp, parents, vec
+objref tp, parents, xvec, yvec, errorvec
 tp = new TreePlot()
-vec = new Vector(10)
-vec.indgen(0,1)
-parents = vec.c
-parents.indgen(-1,1)
+xvec = new Vector(10)
+xvec = xvec.indgen(0,1)
+parents = xvec.c
+parents = parents.indgen(-1,1)
 parents.x(0) = 0
-tp.plot(vec,vec,parents)
+tp.plot(xvec,xvec,parents)
+
+yvec = xvec.c
+yvec = yvec.indgen(0,2)
+tp.plot(xvec,yvec,parents)
+
+yvec = yvec.indgen(0,3)
+tp.marks(1)
+tp.plot(xvec,yvec,parents)
+yvec = yvec.indgen(0,4)
+
+errorvec = new Vector(10)
+errorvec = errorvec.indgen(1,0.1)
+tp.errorbars(0)
+tp.plot(xvec,yvec,parents,errorvec)
+// tp.family(1)
+//yvec = yvec.indgen(0,5)
+// tp.plot(xvec,yvec,parents)
 tp.set_xlab("time /\\mu s")
 tp.set_ylab("value /\\Omega pound")
 tp.auto_limits_on(1,1,1,1)
 tp.view_equal_plot()
 tp.rprintfile("/tmp/test_TreePlot.ps",1)
-
-vec.indgen(0,2)
-tp.plot(vec,vec,parents)
