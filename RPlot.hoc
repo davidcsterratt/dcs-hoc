@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sRPlot = $Revision: 1.8 $, ",pkgversions)
+sprint(pkgversions,"%sRPlot = $Revision: 1.9 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
 load_file("utils.hoc")
@@ -164,8 +164,8 @@ proc textoRtext() {
     sf = new StringFunctions()
     rlab = "expression(paste("
     while (( ind = sf.substr(texlab,"\\")) != -1) {
-            print texlab, "]"
-             print rlab, "]"
+        // print texlab, "]"
+        // print rlab, "]"
         sf.head(texlab,"\\\\",tmp) 
         if (sf.len(tmp)) {
             sprint(rlab,"%s\"%s\",",rlab,tmp)
