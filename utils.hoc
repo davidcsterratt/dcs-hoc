@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) { execute("strdef pkgversions") } 
-sprint(pkgversions,"%sutils = $Revision: 1.17 $, ",pkgversions)
+sprint(pkgversions,"%sutils = $Revision: 1.18 $, ",pkgversions)
 
 //
 // error(String error) 
@@ -52,66 +52,13 @@ proc mean() { local i
 proc stdev() { local i
     $o2 = new Vector($o1.ncol())
     for i=0, $o1.ncol()-1 {
-        $o2.x(i) = $o1.getcol(i).stdev()
+        if ($o1.getcol(i).size > 1) {
+            $o2.x(i) = $o1.getcol(i).stdev()
+        } else {
+            $o2.x(i) = 0
+        }
     }
 }
 
-//
-// integral(Vector y, Vector x)
-//
-// Numerical integration using trapezoid rule
-//
-
-begintemplate Integrator
-public integrate
-
-objref x0, x1, ybar, dx
-
-proc init() {
-    x0 = new Vector()
-    x1 = new Vector()
-    dx = new Vector()
-    ybar = new Vector()
-}
-
-func integrate () {
-    x0.indgen(0, $o2.size()-2,1)
-    x1.indgen(1, $o2.size()-1,1)
-    ybar = $o1.ind(x0) 
-    ybar.add($o1.ind(x1))
-    dx.deriv($o2,1,1) 
-    return ybar.dot(dx)/2
-}
-
-endtemplate Integrator
-
-// 
-// object_is(objref obj, String classname)
-// 
-begintemplate ObjectClass
-public object_is, object_name
-strdef tmpstr, objclass
-
-objref sf
-proc init() {
-    sf = new StringFunctions()
-}
-
-proc object_name() {
-    sprint(tmpstr,"%s",$o1)
-    print tmpstr
-    print $o1
-}
-
-func object_is() { local ind
-    sprint(tmpstr,"%s",$o1)
-    if (!strcmp(tmpstr,"NULLobject")) {
-        objclass = tmpstr
-    } else {
-        sf.head(tmpstr,"\[[0-9]",objclass)
-    }
-    return !strcmp(objclass,$s2)
-}
-endtemplate ObjectClass
 
 
