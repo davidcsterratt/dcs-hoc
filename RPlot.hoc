@@ -1,16 +1,17 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sRPlot = $Revision: 1.5 $, ",pkgversions)
+sprint(pkgversions,"%sRPlot = $Revision: 1.6 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
 load_file("utils.hoc")
 
 begintemplate RPlot
+
 public start_plot, add_graph, end_plot
 public run
 public plot
 public clear
 public set_mfrow
-
+public set_width, set_height
 
 objref xvec, yvec
 objref xveclist, yveclist
@@ -30,10 +31,14 @@ proc init() {
     if (numarg() == 1) {
         rfilename = $s1 
     } else {
-        rfilename = "/tmp/rfile"
+        rfile = new File()
+        rfile.mktemp()
+        rfilename = rfile.getname()
     }
     rfile = new FormatFile(rfilename,"R")
     oc = new ObjectClass()
+    width=6
+    height=4
 }
 
 func getline() { local i 
@@ -50,9 +55,11 @@ proc set_mfrow() {
 
 proc start_plot() {
     rfile.wopen()
-    rfile.f.printf("postscript(file=\"%s\")\n",$s1)    
+    rfile.f.printf("postscript(file=\"%s\"",$s1)
+    rfile.f.printf(", width=%g", width)  
+    rfile.f.printf(", height=%g",height) 
+    rfile.f.printf(", horizontal = FALSE, onefile = FALSE, paper = \"special\")\n")
     rfile.close()
-    
 }
 
 // add_graph(Graph g, String filename, String xlabel, String ylabel) 
@@ -176,5 +183,8 @@ proc textoRtext() {
     $s2 = rlab
 }
 
+proc set_width() { width = $1 }
+proc set_height() { height = $1 }
+    
 
 endtemplate RPlot
