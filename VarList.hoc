@@ -1,6 +1,5 @@
-//
-// TODO graphical function for saving files using "chooser()" ?
-// 
+if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
+sprint(pkgversions,"%sVarList = $Revision: 1.6 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
 
