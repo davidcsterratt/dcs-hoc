@@ -1,11 +1,12 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sTreePlot = $Revision: 1.4 $, ",pkgversions)
+sprint(pkgversions,"%sTreePlot = $Revision: 1.5 $, ",pkgversions)
 
 load_file("TreePlot.hoc")
 load_file("RPlot.hoc")
 
 begintemplate TreePlotArray
-public glist, cellref, rprintfile
+public glist, cellref
+public rprintfile, rp
 
 objref vb
 objref hblist
@@ -31,6 +32,7 @@ proc init() { local i, j
     }
     vb.intercept(0)
     vb.map
+    rp = new RPlot()
 }
 
 proc cellref() {
@@ -39,8 +41,10 @@ proc cellref() {
 
 // rprintfile(String epsfilename, Double SaveFile)
 proc rprintfile() { local i, j
-    if (numarg() == 1) { rp = new RPlot() }
-    if ((numarg() == 2) && ($2 != 0)) { rp = new RPlot($s1) }
+    if (numarg() == 1) { rp.create_rfile() }
+    if (numarg() == 2) {
+        if ($2 != 0) { rp.create_rfile($s1) }
+    }
     rp.start_plot($s1)
     rp.set_mfrow(rows,cols)
     for i=0,rows-1 {
