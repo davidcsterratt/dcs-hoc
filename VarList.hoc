@@ -1,6 +1,10 @@
+//
+// TODO graphical function for saving files using "chooser()" ?
+// 
+
 load_file("FormatFile.hoc")
 
-begintemplate DoublePar
+begintemplate DoubleVar
 
 public name, ptr, type, action
 public printf, fprint
@@ -8,7 +12,7 @@ public printf, fprint
 strdef name, tmpstr, action
 objref ptr
 
-// new Par("name")
+// new Var("name")
 proc init() {
     sprint(name,"%s",$s1)
     ptr = new Pointer(name)
@@ -23,10 +27,10 @@ proc printf() {
 proc fprint() {
     $o1.printdouble(name, ptr.val)
 }
-endtemplate DoublePar
+endtemplate DoubleVar
 
 
-begintemplate StringPar
+begintemplate StringVar
 
 public name, ptr,  type, str, action
 public printf, fprint
@@ -34,7 +38,7 @@ public printf, fprint
 strdef name, cmd, str, action
 objref this
 
-// new Par("name")
+// new Var("name")
 proc init() {
     sprint(name,"%s",$s1)
     if (numarg() >= 2) {
@@ -54,23 +58,23 @@ proc fprint() {
     $o1.printstr(name,str)    
 }
 
-endtemplate StringPar
+endtemplate StringVar
 
 
-begintemplate ParList
+begintemplate VarList
 
 public append
 public appendDouble, appendSetDouble 
 public appendString, appendSetString
 public printf, printf_actions, fprint, fprint_actions
-public save_hoc , load
+public save, load
 public execute_actions
 public l
 
-objref l, f, this
+objref l, f, this, ldfile
 strdef tmpstr
 
-// new Par("name")
+// new Var("name")
 proc init() {
     l = new List()
 }
@@ -82,9 +86,9 @@ proc append() {
 
 proc appendDouble() {
     if ( numarg() >= 2 ) {
-        l.append(new DoublePar($s1,$s2))
+        l.append(new DoubleVar($s1,$s2))
     } else {
-        l.append(new DoublePar($s1))
+        l.append(new DoubleVar($s1))
     }
 }
     
@@ -102,9 +106,9 @@ proc appendSetDouble() {
 
 proc appendString() {
     if ( numarg() >= 2 ) {
-        l.append(new StringPar($s1,$s2))
+        l.append(new StringVar($s1,$s2))
     } else {
-        l.append(new StringPar($s1))
+        l.append(new StringVar($s1))
     }        
 }
 
@@ -141,16 +145,29 @@ proc execute_actions() { local i
     for i= 0, l.count()-1 { execute(l.object(i).action) } 
 }
 
-proc save_hoc() {
-    f = new FormatFile($s1,"hoc")
+proc save() {
+    if (numarg() == 0) {
+        f = new FormatFile("","hoc")
+        f.chooser("w","Save Parameters to file","*.hoc")
+        f.chooser()
+    } else {
+        f = new FormatFile($s1,"hoc")
+    }
     f.wopen()
     fprint(f)
     fprint_actions(f)
     f.close()
 }
 
-// Procedure to load from file
+// Procedure to load from file adapted from stdrun.hoc
 proc load() {
+	if (object_id(ldfile) == 0) {
+		ldfile = new File()
+	}
+	ldfile.chooser("r", "Load", "*.hoc", "Load", "Cancel", getcwd())
+	if (ldfile.chooser()) {
+			load_file(1, ldfile.getname)
+	}
 }
 
-endtemplate ParList
+endtemplate VarList
