@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sVarList = $Revision: 1.8 $, ",pkgversions)
+sprint(pkgversions,"%sVarList = $Revision: 1.9 $, ",pkgversions)
 
 //
 // TODO: implement units setting using the units command.
@@ -114,11 +114,15 @@ objref ptr, this
 
 // new Var("name")
 proc init() {
+    init_value = 0
     sprint(name,"%s",$s1)
     sprint(cmd,"%s.ptr = %s", this, name)
     execute1(cmd)
     if (numarg() >= 2) {
         sprint(action,"%s",$s2)
+    }
+    if (numarg() >= 3) {
+        init_value = $3
     }
 }
 
@@ -129,7 +133,7 @@ proc printf() { local i
     }
 }
 proc fprint() {
-    $o1.printlistasmat(name, ptr)
+    $o1.printlistasmat(name, ptr, init_value)
 }
 endtemplate VectorListVar
 
@@ -211,11 +215,9 @@ proc appendVector() {
 }
 
 proc appendVectorList() {
-    if ( numarg() >= 2 ) {
-        l.append(new VectorListVar($s1,$s2))
-    } else {
-        l.append(new VectorListVar($s1))
-    }        
+    if ( numarg() == 3 ) { l.append(new VectorListVar($s1,$s2,$3)) }
+    if ( numarg() == 2 ) { l.append(new VectorListVar($s1,$s2)) }
+    if ( numarg() == 1 ) { l.append(new VectorListVar($s1)) }
 }
 
 proc printVarNames() { local i
