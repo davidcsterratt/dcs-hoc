@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sTreePlot = $Revision: 1.4 $, ",pkgversions)
+sprint(pkgversions,"%sTreePlot = $Revision: 1.5 $, ",pkgversions)
 
 begintemplate TreePlot
 
@@ -7,9 +7,14 @@ objref graph, xvec, yvec, diamvec, parentsvec
 objref tmpxvec, tmpyvec
 public plot, lines, marks
 public graph, xvec, yvec, diamvec, parentsvec, view, size
+public view_equal_plot, auto_limits_on, set_limits
 
+double manual_limits[4]
+double auto_limits[4]
+double auto_flag[4]
+double limits[4]
 
-proc init() {
+proc init() { local i 
     // Allow not to map, similar to Graph object
     if (numarg()== 1) {
         graph = new Graph($1)
@@ -21,6 +26,7 @@ proc init() {
     colour=1
     lines_flag=1
     marks_flag=0
+    for i=0,3 { auto_flag[i] = 1 }
 }
 
 proc plot() { local i
@@ -45,15 +51,6 @@ proc plot() { local i
     if (colour == 10) colour=1
 }
 
-// mleft, mbottom, mwidth, mheight, wleft, wtop, wwidth, wheight
-proc view() {
-    graph.view($1,$2,$3,$4,$5,$6,$7,$8)
-}
-
-proc size() {
-    graph.size($1,$2,$3,$4)
-}
-
 // turn lines on or off
 proc lines() {
     lines_flag = $1
@@ -64,5 +61,39 @@ proc marks() {
     marks_flag = $1
 }
 
+// mleft, mbottom, mwidth, mheight, wleft, wtop, wwidth, wheight
+proc view() {
+    graph.view($1,$2,$3,$4,$5,$6,$7,$8)
+}
+
+// Clone of Graph.size()
+proc size() {
+    graph.size($1,$2,$3,$4)
+}
+
+// Set manual limits which will be respected by view_equal_plot() in
+// directions for which auto_limits = 0
+proc set_limits() { local i
+    for i=1,4 { manual_limits[i-1] = $i }
+}
+
+// turn on automatic setting of limit when argument corresponding to
+// argument in size() is 1
+proc auto_limits_on() { local i 
+    for i=1,4 { auto_flag[i-1] = $i }
+}
+
+// Fit graph to plot (apart from manually-set limits)
+proc view_equal_plot() { local i
+    graph.size(&auto_limits)
+    for i=0,3 {
+        if (auto_flag[i]) {
+            limits[i] = auto_limits[i]
+        } else {
+            limits[i] = manual_limits[i]
+        }
+    }
+    size(limits[0], limits[1], limits[2], limits[3])
+}
 
 endtemplate TreePlot
