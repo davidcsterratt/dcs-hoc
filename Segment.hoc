@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sSegment = $Revision: 1.6 $, ",pkgversions)
+sprint(pkgversions,"%sSegment = $Revision: 1.7 $, ",pkgversions)
 
 /*
 
@@ -17,12 +17,16 @@ segref.x      - the point x that locates the segment along sect
 */
 
 begintemplate SegmentRef
-public secref, x
+public secref, x, name
 objref secref
 
 proc init() {
     secref = new SectionRef()
     x = $1
+}
+
+proc name() {
+    secref.sec print secname(), "(", x, ")"
 }
 
 endtemplate SegmentRef
