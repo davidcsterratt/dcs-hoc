@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sRPlot = $Revision: 1.3 $, ",pkgversions)
+sprint(pkgversions,"%sRPlot = $Revision: 1.4 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
 load_file("utils.hoc")
@@ -54,7 +54,8 @@ proc start_plot() {
 }
 
 // add_graph(Graph g, String filename, String xlabel, String ylabel) 
-proc add_graph() {
+proc add_graph() { local limits_set
+    limits_set = 0
     xlab = ""
     ylab = ""
     if (oc.object_is($o1,"TreePlot")) { 
@@ -77,18 +78,25 @@ proc add_graph() {
     }
     vi = $o1.view_info()
     if (vi != -1) {
+        limits_set = 1
         xmin = $o1.view_info(vi,5)
         xmax = $o1.view_info(vi,6)
         ymin = $o1.view_info(vi,7)
         ymax = $o1.view_info(vi,8)
     }
-    
+    if (oc.object_is($o1,"TreePlot")) { 
+        limits_set = 1
+        xmin = $o1.get_limit(1)
+        xmax = $o1.get_limit(2)
+        ymin = $o1.get_limit(3)
+        ymax = $o1.get_limit(4)
+    }
     rfile.aopen()
     rfile.print_VectorList("xvec",xveclist)
     rfile.print_VectorList("yvec",yveclist)
     rfile.print_VectorList("li",lilist)
 
-    if (vi != -1) {
+    if (limits_set) {
         rfile.f.printf("plot(NA,NA,xlim=c(%g,%g),ylim=c(%g,%g),xlab=\"%s\",ylab=\"%s\")\n",xmin,xmax,ymin,ymax,xlab,ylab) 
     } else {
         rfile.printf("plot(NA,NA,")
