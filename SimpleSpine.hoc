@@ -1,0 +1,68 @@
+if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
+sprint(pkgversions,"%sSimpleSpine = $Revision: 1.1 $, ",pkgversions)
+
+begintemplate SimpleSpine
+
+public head
+public headL, headdiam
+public neckL, neckdiam
+public loc, addSyn
+objref this
+
+create head
+proc init() {
+    headL = 0.2
+    headdiam = 1
+    neckL = 1 
+    neckdiam = 0.2
+    create head
+    head insert pas
+    // Second arg prevents location
+    if (numarg() == 1) { this.loc($1) }
+    // Get properties of spine from parent (which we're accessing)
+    pRa = Ra
+    if (ismembrane("g_pas")) {
+        pg_pas = g_pas
+    } else {
+        pg_pas = 10E-5
+    }
+    head {
+        Ra = pRa
+        // This is to simulate the head resistance so we adjust it
+        // so that it's the same as the head would have been
+        g_pas = pg_pas * (headL/neckL) * (headdiam/neckdiam)
+        diam = neckdiam
+        L = 2 * (neckL)         // double the real length as input is at 0.5
+    }
+}
+
+proc loc() {
+    connect head(0), $1    
+}
+
+proc addSyn() {
+    head $o1.loc(0.5)
+}
+
+
+// spine {
+//     insert pas
+//     L = 2                               // double the real length
+//     diam = 0.2
+//     Ra = 250
+//     g_pas = 1 / (50000 / 2) /10 * 5 // what it would be if the spine neck was 10* shorter (i.e 0.2um) and 5 times wider (i.e. 1um).
+// }
+
+// objref syn, ns, nc
+// spine {
+//     syn = new AmpaSyn(0.5)
+//     ns = new NetStim(0.5)
+//     nc = new NetCon(ns,syn)
+//     nc.weight = 0.001                   // 1nS
+//     ns.number = 1
+//     ns.noise = 0
+//     ns.start = 0
+//     ns.interval = 0.1 // If this is set too low, the weight is set to 1
+// }
+
+endtemplate SimpleSpine

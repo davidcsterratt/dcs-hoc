@@ -1,0 +1,51 @@
+if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
+sprint(pkgversions,"%sNmdaAmpaSpineSynStim = $Revision: 1.1 $, ",pkgversions)
+
+load_file("SimpleSpine.hoc")
+
+/*
+
+Exp2SynStim - exponential synapse with netstim stimulus
+
+ess = new Exp2SynStim()  - creates ExpSynStim ess
+ess.loc(x)              - locates at x on the current section
+ess.get_loc()           - returns relative location along the section
+ess.get_distance()      - returns distance from origin specified by distance()
+
+*/
+
+begintemplate NmdaAmpaSpineSynStim
+
+public loc,  get_distance // get_loc,
+public expsyn, nmdasyn, netcon, nmdanetcon, netstim, spine
+objref expsyn, nmdasyn, netcon, nmdanetcon, netstim, spine 
+
+proc init() {
+    if (numarg() == 1) { spine = new SimpleSpine(0.5) }
+    if (numarg() == 2) { spine = new SimpleSpine(0.5, $2) }
+    spine.head {
+        expsyn  = new Exp2Syn(0.5)
+        nmdasyn = new NmdaSyn(0.5)
+        netstim = new NetStim(0.5)
+        netcon  = new NetCon(netstim,expsyn)
+        nmdanetcon = new NetCon(netstim,nmdasyn)
+    }
+}
+
+proc loc() {
+    spine.loc($1)
+}
+
+// func get_loc() {
+//     x =  expsyn.get_loc()
+//     pop_section()                 // needed to keep the stack in order
+//     return x
+// }
+
+func get_distance() {
+    dist = distance(expsyn.get_loc()) // Seems to work, though not documented
+    pop_section()                 // needed to keep the stack in order
+    return dist
+}
+
+endtemplate NmdaAmpaSpineSynStim
