@@ -1,4 +1,4 @@
-fprint("utils_ver = '$Revision: 1.6 $';\n")
+fprint("utils_ver = '$Revision: 1.7 $';\n")
 
 //
 // error(String error) 
@@ -230,8 +230,7 @@ proc printmtimes() { local i, j, total_size, blockend, end
                     // Reached the end of all the data?
                     if ( pos != end ) {
                         blockend = min(end, pos + 100) 
-                        sprint(utils_tmpstr,"%s(%g:%g,:) = [ ...\n", name, pos, blockend - 1)
-                        $o1.printf("%s",utils_tmpstr)
+                        $o1.printf("%s(%g:%g,:) = [ ...\n", name, pos, blockend - 1)
                     }
                 }
             }
