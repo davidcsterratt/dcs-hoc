@@ -1,4 +1,4 @@
-fprint("utils_ver = '$Revision: 1.9 $';\n")
+fprint("utils_ver = '$Revision: 1.10 $';\n")
 
 //
 // error(String error) 
@@ -32,19 +32,31 @@ func max() {
 }
 
 //
-// setprintmpar("parameter_name", parameter_value)
+// setprintmpar( File file, "parameter_name", parameter_value)
 // 
 // set parameter of paramater_name to parameter_value and print
-// the parameter name and value to the default open file (open with 
-// IO-wopen().
+// the parameter name and value to file.
 // 
 
+strdef utils_printmprefix
 strdef utils_tmpstr
-proc setprintmpar () { 
-    sprint(utils_tmpstr, "%s = %g", $s1, $2)
+proc setprintmpar () {
+    sprint(utils_tmpstr, "%s = %g", $s2, $3)
     execute(utils_tmpstr)
-    sprint(utils_tmpstr, "fprint(\"%s = %g ;\\n\", %s )", $s1, $2, $s1)
+    printmdouble($o1, $3, $s2)
     execute(utils_tmpstr)
+}
+
+//
+// printmstr(file_handle, string, "string_name")
+// 
+// Print string to file_handle in matlab format with name string_name.
+// 
+
+proc printmstr () { 
+    $o1.printf("%s%s = ", utils_printmprefix, $s3)
+    $o1.printf("'%s' ", $s2)
+    $o1.printf(" ;\n")
 }
 
 //
@@ -54,7 +66,7 @@ proc setprintmpar () {
 // 
 
 proc printmdouble () { 
-    $o1.printf("%s = [ ", $s3)
+    $o1.printf("%s%s = [ ", utils_printmprefix, $s3)
     $o1.printf("%g ", $2)
     $o1.printf(" ];\n")
 }
@@ -69,61 +81,78 @@ proc printmdouble () {
 // 
 // printmvec(file_handle, vector, "vector_name", start, end)
 // 
-// Same as above, but only print from index start to index end
+// Same as above, but only print from index start to index end.  
+// The start and end indeicies are in the range 0 to vector.size()-1 , 
+// i.e. the NEURON/C convention rather than Matlab convetion.  They 
+// will, however, be printed in Matlab convention.
 //
+// printmvec(file_handle, vector, "vector_name", start, end, row)
+// 
+// Same as above, but print vector as row of matrix.  Again, indicies
+// are from 0 to vector.size()-1.
 
-proc printmvec () { local i, chunk_size, start, end, total_size, pos, name, blockend
-    chunk_size = 10             // How many figures per line to print
-    pos = 1                     // Position -- i.e. total number 
-                                // of unprinted spikes
 
+proc printmvec () { local i, chunk_size, start, end, total_size, pos, name, blockend, row
+    chunk_size = 10             // How many elements per line to print
+    block_size = 100            // How many elements per vector to print
+    utils_tmpstr = ""
+    
+    //
+    // Deal with input arguments
+    //
+    
     if (numarg() == 3) {
-        start = 0 
-        end = $o2.size() - 1 
-    } else {
+        start = 0
+        end = $o2.size() - 1
+    }
+
+    if (numarg() >= 5) {
         start = $4
         end = $5
         if (start != int(start)) { error("utils.hoc:printmvec(): start value is not an integer")}
         if (end != int(end)) { error("utils.hoc:printmvec(): end value is not an integer") }
         if (end < start ) { error("utils.hoc:printmvec(): end value is lower than start value") }
     }
+
+    if (numarg() == 6) {
+        row = $6
+        sprint(utils_tmpstr,"%g,",row + 1)
+    }
     
-    // Find out how many values need to be printed in total
-    total_size = $o2.size() 
-    //    printf("total_size: %g\n", total_size)
-    //    printf("pos: %g\n", pos)
-    
+    //
     // Print out values
-    if (total_size >= 1 ) {
-        // We want blocks of 100 lines or less
-        end = pos + total_size
-        blockend = min(end, pos + 100) 
-        
-        $o1.printf("%s(%g:%g) = [ ...\n", $s3, pos, blockend - 1)
-        for j=0, $o2.size() - 1 {
-            $o1.printf("%g ", $o2.x(j))
-            if ( ( ( j + 1 ) % chunk_size ) == 0 ) {
+    //
+    
+    // Only print if there are values to print
+    if ( (end-start) >= 0 ) {
+
+        // Loop throgh values
+        for j = start, end {
+
+            // Split vector into new vector every block_size elements 
+            // as long as we're not at the end of the vector
+            if (((j-start) % block_size) == 0) {
+
+                // If not at the start of the vector, need to finish old 
+                // vector
+                if ( j != start ) {
+                    $o1.printf("];\n") 
+                }
+                $o1.printf("%s%s(%s%g:%g) = [ ", utils_printmprefix, $s3, utils_tmpstr, j+1, min((j+block_size),end+1))
+            }
+            
+            // Newline and ... every chunk_size elements
+            if ( ( ( j - start  ) % chunk_size ) == 0 ) {
                 $o1.printf(" ...\n") 
             }
-            pos = pos + 1
-            // Reached the end of this block?
-            if ( pos == blockend ) { 
-                $o1.printf("];\n") 
-                // Reached the end of all the data?
-                if ( pos != end ) {
-                    blockend = min(end, pos + 100) 
-                    $o1.printf("%s(%g:%g) = [ ...\n", $s3, pos, blockend - 1)
-                }
-            }
+            
+            // Print out element itself
+            $o1.printf("%g ", $o2.x(j))
         }
+        
+        // Print end of vector
+        $o1.printf("];\n") 
     }
-
-//    print start, end
-//    $o1.printf("%s = [ ", $s3)
-//    for i = start, end {
-//        $o1.printf("%g ", $o2.x(i))
-//    }
-//    $o1.printf(" ];\n")
 }
 
 objref utils_p 
@@ -156,7 +185,7 @@ proc test_local () { local a
 
 begintemplate SpikeList
 
-external min, max
+external min, max, utils_printmprefix
 public cell, clear, pos, name, times, n, printmtimes
 objref times                     // Spike time list
 strdef name
@@ -184,7 +213,7 @@ proc printmtimes() { local i, j, total_size, blockend, end
         end = pos + total_size
         blockend = min(end, pos + 100) 
         
-        $o1.printf("%s(%g:%g,:) = [ ...\n", name, pos, blockend - 1)
+        $o1.printf("%s%s(%g:%g,:) = [ ...\n", utils_printmprefix, name, pos, blockend - 1)
         for i=0, n-1 {
             for j=0, times.object(i).size() - 1 {
                 $o1.printf("%4.0f %g; ... \n", i+1, times.object(i).x(j))
@@ -195,7 +224,7 @@ proc printmtimes() { local i, j, total_size, blockend, end
                     // Reached the end of all the data?
                     if ( pos != end ) {
                         blockend = min(end, pos + 100) 
-                        $o1.printf("%s(%g:%g,:) = [ ...\n", name, pos, blockend - 1)
+                        $o1.printf("%s%s(%g:%g,:) = [ ...\n", utils_printmprefix, name, pos, blockend - 1)
                     }
                 }
             }
