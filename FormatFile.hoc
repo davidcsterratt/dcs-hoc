@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sFormatFile = $Revision: 1.11 $, ",pkgversions)
+sprint(pkgversions,"%sFormatFile = $Revision: 1.12 $, ",pkgversions)
 
 /*
 
@@ -447,17 +447,20 @@ proc printlistasmat () { local i, ncol, init_value
 // 
 
 proc print_VectorList () { local i
-        f.printf("%s%s %s ", prefix, $s1, assop)
-        if (!strcmp(format, "R")) {
-            f.printf("list()\n")
-        }
-        for i=0, $o2.count()-1 {
-            sprint(tmpstr,"%s[[%g]]",$s1,i+1)
-            printvec(tmpstr, $o2.object(i))
-        }
+    f.printf("%s%s %s ", prefix, $s1, assop)
+    if (!strcmp(format, "R")) {
+        f.printf("list()\n")
+    }
+    for i=0, $o2.count()-1 {
+        sprint(tmpstr,"%s[[%g]]",$s1,i+1)
+        printvec(tmpstr, $o2.object(i))
+    }
 }
 
 proc printstr () { 
+    if (!strcmp(format,"hoc")) {
+        f.printf("strdef %s%s\n", prefix, $s1)
+    }
     f.printf("%s%s %s ", prefix, $s1, assop)
     f.printf("%s%s%s ", quot,$s2,quot)
     f.printf(" %s\n",lineend)
