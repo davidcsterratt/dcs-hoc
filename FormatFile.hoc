@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sFormatFile = $Revision: 1.6 $, ",pkgversions)
+sprint(pkgversions,"%sFormatFile = $Revision: 1.7 $, ",pkgversions)
 
 /*
 
@@ -92,6 +92,7 @@ public printlistasmat
 public printstr
 public setprintdouble
 public setprintstr
+public printf
 
 // Private variables
 
@@ -107,7 +108,9 @@ strdef assop
 strdef openvec
 strdef elsep
 strdef closevec
+strdef linecont
 strdef lineend
+strdef quot
 
 strdef tmpstr, rowstr, varname
 
@@ -123,7 +126,7 @@ proc init() {
     format = "Matlab"
     if ( numarg() >= 2 ) {
         format = $s2
-        if (!(!strcmp(format, "Matlab") || !strcmp(format, "R"))) {
+        if (!(!strcmp(format, "Matlab") || !strcmp(format, "R") || !strcmp(format, "hoc"))) {
             print "FormatFile Error: unrecognised format specified"
             return
         }
@@ -135,7 +138,9 @@ proc init() {
         openvec = "["
         elsep = " "
         closevec = "]"
-        lineend = "..."
+        linecont = "..."
+        lineend = ";"
+        quot="'"
         sprint(filename,"%s.m",$s1)
     }
     if (!strcmp(format, "R")) {
@@ -145,8 +150,22 @@ proc init() {
         openvec = "c("
         elsep = ","
         closevec = ")"
-        lineend = ""
+        linecont = ""
+        lineend = ";"
+        quot="\'"
         sprint(filename,"%s.R",$s1)
+    }
+    if (!strcmp(format, "hoc")) {
+        openind = "["
+        closeind = "]"
+        assop = "="
+        openvec = "c("
+        elsep = ","
+        closevec = ")"
+        linecont = ""
+        lineend = ""
+        quot="\""
+        sprint(filename,"%s.hoc",$s1)
     }
     f = new File(filename)
     
@@ -173,7 +192,7 @@ proc init() {
 
 proc print_structname () {
     if (!strcmp(format, "R") && (wopened_flag==0) && (structflag==1)) {
-        f.printf("%s <- list();\n", structname)
+        f.printf("%s <- list()%s\n", structname,lineend)
         wopened_flag = 1
     }
 }
@@ -236,7 +255,7 @@ proc printdouble() {
     sprint(varname, "%s%s", prefix, $s1) 
     f.printf("%s %s ", varname, assop)
     f.printf("%g ", $2)
-    f.printf(";\n")
+    f.printf("%s\n",lineend)
 
 }
 
@@ -274,7 +293,7 @@ proc printvec() {
     
     //     }
     if (!strcmp(format, "R")) {
-        f.printf("%s <- c();\n",varname)
+        f.printf("%s <- c()%s\n",varname,lineend)
     }
     printvec_generic(varname, $o2) 
     
@@ -303,14 +322,14 @@ proc printvec_generic () { local i, chunk_size,  total_size, pos, name, blockend
                 // If not at the start of the vector, need to finish old 
                 // vector
                 if ( j != start ) {
-                    f.printf("%s;\n",closevec) 
+                    f.printf("%s%s\n",closevec,lineend) 
                 }
                 f.printf("%s%s%s%g:%g%s %s %s ", varname, openind, rowstr, j+1, min((j+block_size),end+1),closeind, assop, openvec)
             }
             
             // Newline and ... every chunk_size elements
             if ( ( ( j - start  ) % chunk_size ) == 0 ) {
-                f.printf("%s\n", lineend) 
+                f.printf("%s\n", linecont) 
             }
             
             // Print out element itself
@@ -318,7 +337,7 @@ proc printvec_generic () { local i, chunk_size,  total_size, pos, name, blockend
         }
         
         // Print end of vector
-        f.printf("%s;\n",closevec) 
+        f.printf("%s%s\n",closevec,lineend) 
     }
 }
 
@@ -344,7 +363,7 @@ proc printmat () { local i, j, nrows, ncols
     // Need to initialise matrix
     // 
     if (!strcmp(format, "R")) {
-        f.printf("%s <- matrix(0, nrow=%g, ncol=%g);\n", varname, nrows, ncols)
+        f.printf("%s <- matrix(0, nrow=%g, ncol=%g)%s\n", varname, nrows, ncols,lineend)
     }
     
     //
@@ -402,8 +421,8 @@ proc printlistasmat () { local i, ncol, init_value
 
 proc printstr () { 
     f.printf("%s%s %s ", prefix, $s1, assop)
-    f.printf("'%s' ", $s2)
-    f.printf(" ;\n")
+    f.printf("%s%s%s ", quot,$s2,quot)
+    f.printf(" %s\n",lineend)
 }
 
 
@@ -430,6 +449,14 @@ proc setprintstr () {
     sprint(tmpstr, "%s = \"%s\"", $s1, $s2)
     execute(tmpstr)
     printstr($s1, $s2)
+}
+
+//
+// Sometimes useful to have limited printf fucntionality
+// 
+
+proc printf() {
+    f.printf($s1,$s2) 
 }
 
 endtemplate FormatFile
