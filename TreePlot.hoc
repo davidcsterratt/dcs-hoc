@@ -1,16 +1,21 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sTreePlot = $Revision: 1.1 $, ",pkgversions)
+sprint(pkgversions,"%sTreePlot = $Revision: 1.2 $, ",pkgversions)
 
 begintemplate TreePlot
 
 objref graph, xvec, yvec, diamvec, parentsvec
 objref tmpxvec, tmpyvec
 public plot
-public graph, xvec, yvec, diamvec, parentsvec
+public graph, xvec, yvec, diamvec, parentsvec, view
 
 
 proc init() {
-    graph = new Graph()
+    // Allow not to map, similar to Graph object
+    if (numarg()== 1) {
+        graph = new Graph($1)
+    } else {
+        graph = new Graph()
+    }
     tmpxvec = new Vector(2)
     tmpyvec = new Vector(2)
     colour=1
@@ -29,6 +34,11 @@ proc plot() { local i
     }
     colour +=1
     if (colour == 10) colour=1
+}
+
+// mleft, mbottom, mwidth, mheight, wleft, wtop, wwidth, wheight
+proc view() {
+    graph.view($1,$2,$3,$4,$5,$6,$7,$8)
 }
 
 endtemplate TreePlot
