@@ -1,4 +1,4 @@
-fprint("Segment_ver = '$Revision: 1.2 $';\n")
+fprint("Segment_ver = '$Revision: 1.3 $';\n")
 /*
 
 SegmentRef
@@ -43,6 +43,12 @@ segreflist.append_internal_segments_from_seclist(SectionList seclist)
 Appends all of the internal (i.e. where x is not 0 or 1) segments from
 the SectionList seclist to the SegmentRefList segreflist.
 
+sect segreflist.append_nonzero_segments_from_section()
+segreflsit.append_nonzero_segments_from_seclist(SectionList seclist)
+
+The same as the append_internal_segments commands except that segments
+with x=1 are also appended.
+
 The following public variable is useful:
 
 segreflist.srl - the List of SegmentRefs.  Can be accessed using List
@@ -53,15 +59,32 @@ segreflist.parents(Vector parent_indicies)
 The ith element of parent_indicies contains the index of the
 SegmentRef in segreflist.srl that is nearest to and ancestral to the
 ith SegmentRef in the list.  Useful for certain kinds of plot.
-                 
+
 */
 
 
 begintemplate SegmentRefList
-public srl, parents, append_segments, append_segments_without_zeros
+
+// Public variables
+
+public srl
+objref srl
+
+// Functions
+
+public append_segments_from_seclist
 public append_internal_segments_from_section
+public append_internal_segments_from_seclist
+public append_nonzero_segments_from_section
+public append_nonzero_segments_from_seclist
 public display
-objref srl, bestseg
+public parents
+
+// Private variables
+
+objref bestseg
+
+// Function definitions
 
 proc init() { 
     srl = new List()
@@ -96,6 +119,20 @@ proc append_internal_segments_from_section() { local x
 proc append_internal_segments_from_seclist() { 
     forsec $o1 {
         append_internal_segments_from_section()
+    }
+}
+
+proc append_nonzero_segments_from_section() { local x 
+    for (x) {
+        if ( x != 0 )  {
+            srl.append(new SegmentRef(x))
+        }
+    }
+}
+
+proc append_nonzero_segments_from_seclist() { 
+    forsec $o1 {
+        append_nonzero_segments_from_section()
     }
 }
 
