@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sFormatFile = $Revision: 1.9 $, ",pkgversions)
+sprint(pkgversions,"%sFormatFile = $Revision: 1.10 $, ",pkgversions)
 
 /*
 
@@ -173,7 +173,7 @@ proc init() {
         sprint(filename,"%s.hoc",$s1)
     }
     f = new File(filename)
-    
+        
     structflag = 0
     if ( numarg() >= 3 ) {
         structflag = 1
@@ -185,8 +185,6 @@ proc init() {
             sprint(prefix, "%s$", structname)
         }
     }
-    
-
 }
 
 // Open and closing functions inherited from File except that we only
@@ -198,8 +196,12 @@ proc init() {
 proc print_structname () {
     if (!strcmp(format, "R") && (wopened_flag==0) && (structflag==1)) {
         f.printf("%s <- list()%s\n", structname,lineend)
+    }
+    if (!strcmp(format, "hoc")) {
+        initialise_hoc_file()
         wopened_flag = 1
     }
+
 }
 
 
@@ -353,51 +355,67 @@ proc printvec_generic () { local i, chunk_size,  total_size, pos, name, blockend
 }
 
 proc printvec_hoc() { local i
-    f.printf("objref %s\n", $s1)
-    f.printf("%s = new Vector(%g)\n", $s1, $o2.size())
+    f.printf("scan_vec_()\n")
+    f.printf("%s\n", $s1)
+    f.printf("%g\n", $o2.size())
     for i=0, $o2.size()-1 {
-        f.printf("%s.x(%g) = %.10g\n",$s1, i, $o2.x(i))
+        f.printf("%.10g ",$o2.x(i))
     }
+    f.printf("\n")
 }
 
 //
 // printmat
 //
 proc printmat () { local i, j, nrows, ncols
-    //
-    // Deal with input arguments
-    //
-    
     sprint(varname, "%s%s", prefix, $s1) 
-    if (numarg() == 2) {
-        nrows = $o2.nrow()
-        ncols = $o2.ncol()
-    }
     
-    // Naughty communication to printvec_generic
-    start = 0
-    end = ncols-1
-    
-    // 
-    // Need to initialise matrix
-    // 
-    if (!strcmp(format, "R")) {
-        f.printf("%s <- matrix(0, nrow=%g, ncol=%g)%s\n", varname, nrows, ncols,lineend)
-    }
-    
-    //
-    // Print out values
-    //
-    
-    // Only print if there are values to print
-    if ( (nrows >= 1)  && (ncols >=1) ) {
+    if (!strcmp(format, "hoc")) {
+        printmat_hoc(varname, $o2)
+    } else { 
+        if (numarg() == 2) {
+            nrows = $o2.nrow()
+            ncols = $o2.ncol()
+        }
         
-        // Loop throgh rows
-        for i = 0, nrows-1 {
+        // Naughty communication to printvec_generic
+        start = 0
+        end = ncols-1
+        
+        // 
+        // Need to initialise matrix
+        // 
+        if (!strcmp(format, "R")) {
+            f.printf("%s <- matrix(0, nrow=%g, ncol=%g)%s\n", varname, nrows, ncols,lineend)
+        }
+        
+        //
+        // Print out values
+        //
+        
+        // Only print if there are values to print
+        if ( (nrows >= 1)  && (ncols >=1) ) {
             
-            // Use printvec_generic
-            sprint(rowstr,"%g,",i + 1)
-            printvec_generic(varname,$o2.getrow(i))
+            // Loop throgh rows
+            for i = 0, nrows-1 {
+                
+                // Use printvec_generic
+                sprint(rowstr,"%g,",i + 1)
+                printvec_generic(varname,$o2.getrow(i))
+            }
+        }
+    }
+}
+
+proc printmat_hoc() { local i, j, nrow, ncol
+    nrow = $o2.nrow()
+    ncol = $o2.ncol()
+    f.printf("scan_mat_()\n%s\n\%g %g\n", $s1, nrow, ncol)
+    if ((nrow >= 1)  && (ncol >=1)) {
+        for i = 0, nrow-1 {
+            for j=0, ncol-1 {
+                f.printf("%.10g ", $o2.x[i][j])
+            }
         }
     }
 }
@@ -506,6 +524,58 @@ proc chooser() { local i
 proc unlink() {
     f.unlink()
 }
-    
+
+proc initialise_hoc_file() {
+    f.printf("\
+strdef tmp_name_\
+strdef tmp_cmd_\
+objref tmp_obj_\
+")
+    f.printf("\
+proc scan_vec_() { local i, n\
+    ")
+    f.printf("\
+    getstr(tmp_name_,1)\
+    n = fscan()\
+    tmp_obj_ = new Vector(n)\
+    for i=0,n-1 {\
+        tmp_obj_.x(i) = fscan()\
+    }\
+")    
+    f.printf("\
+    sprint(tmp_cmd_, \"{objref %%s}\", tmp_name_)\
+    execute(tmp_cmd_)\
+    ")    
+    f.printf("\
+    sprint(tmp_cmd_, \"{%%s = tmp_obj_}\", tmp_name_)\
+    execute(tmp_cmd_)\
+}\
+")
+    f.printf("\
+proc scan_mat_() { local i, j, nrow, ncol\
+    ")
+    f.printf("\
+    getstr(tmp_name_,1)\
+    nrow = fscan()\
+    ncol = fscan()\
+    tmp_obj_ = new Matrix(nrow,ncol)\
+    ")
+    f.printf("\
+    for i=0,nrow-1 {\
+        for j=0,ncol-1 {\
+            tmp_obj_.x[i][j] = fscan()\
+        }\
+    }\
+")
+    f.printf("\
+    sprint(tmp_cmd_, \"{objref %%s}\", tmp_name_)\
+    execute(tmp_cmd_)\
+    ")    
+    f.printf("\
+    sprint(tmp_cmd_, \"{%%s = tmp_obj_}\", tmp_name_)\
+    execute(tmp_cmd_)\
+}\
+")    
+}
 
 endtemplate FormatFile
