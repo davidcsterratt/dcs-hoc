@@ -13,3 +13,6 @@ tp.set_ylab("value /\\Omega pound")
 tp.auto_limits_on(1,1,1,1)
 tp.view_equal_plot()
 tp.rprintfile("/tmp/test_TreePlot.ps",1)
+
+vec.indgen(0,2)
+tp.plot(vec,vec,parents)
