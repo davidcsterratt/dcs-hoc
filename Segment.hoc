@@ -1,4 +1,4 @@
-fprint("Segment_ver = '$Revision: 1.3 $';\n")
+fprint("Segment_ver = '$Revision: 1.4 $';\n")
 /*
 
 SegmentRef
@@ -72,6 +72,7 @@ objref srl
 
 // Functions
 
+public append_segments_from_section
 public append_segments_from_seclist
 public append_internal_segments_from_section
 public append_internal_segments_from_seclist
@@ -90,21 +91,15 @@ proc init() {
     srl = new List()
 }
 
-proc append_segments_from_seclist() { local x
-    forsec $o1 {
-        for (x) {
-            srl.append(new SegmentRef(x))
-        }
+proc append_segments_from_section() { local x 
+    for (x) {
+        srl.append(new SegmentRef(x))
     }
 }
 
-proc append_segments_from_seclist_without_zeros() { local x
+proc append_segments_from_seclist() { local x
     forsec $o1 {
-        for (x) {
-            if ( x != 0 ) {
-                srl.append(new SegmentRef(x))
-            }
-        }
+        append_segments_from_section()
     }
 }
 

@@ -1,0 +1,67 @@
+load_file("FormatFile.hoc")
+
+objref vec, outfile
+objref mat
+
+proc print_tests() {
+    // Double
+    a = 5 
+    outfile.printdouble("a",a)
+    
+    // empty vector
+    vec = new Vector()
+    outfile.printvec("vec",vec) 
+    
+    // Short vector
+    vec.indgen(1,10,1)
+    outfile.printvec("vec",vec)
+    
+    //  Partial printing
+    outfile.printvec("vec",vec,4,7)
+    
+    // Longer vector
+    vec.indgen(1,25,1)
+    outfile.printvec("vec",vec)
+    //     printmvec(outfile,vec,"vec",4,7)
+    //    oprintmvec(outfile,vec,"vec",4,22)
+    
+    // A vector just on the block size
+    vec.indgen(1,100,1)
+    outfile.printvec("vec",vec)
+    outfile.printvec("vec",vec,55,72)
+    
+    // A vector bigger than the block size
+    vec.indgen(1,101,1)
+    outfile.printvec("vec",vec)
+    
+    
+    // A matrix
+    mat = new Matrix(6,101)
+    for i = 0, 5 {
+        mat.setrow(0, vec)
+    }
+    outfile.printmat("mat",mat)
+     
+}    
+
+// Should complain about this
+outfile = new FormatFile("test_FormatFile.null","skdfh")
+
+outfile = new FormatFile("test_FormatFile.m")
+
+outfile.wopen()
+print_tests()
+outfile.close()
+
+outfile = new FormatFile("test_FormatFile.R","R")
+outfile.wopen()
+print_tests()
+outfile.close()
+
+outfile = new FormatFile("test_FormatFile-struct.R","R","r")
+outfile.wopen()
+print_tests()
+outfile.close()
+
+
+

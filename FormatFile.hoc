@@ -1,0 +1,323 @@
+/*
+
+FormatFile
+
+f = new FormatFile(String file)
+
+Sets up a new FormatFile that will print objects to file in Matlab format.
+
+f = new FormatFile(String file, String format)
+
+Sets up a new FormatFile that will print objects to file in format,
+where format can be "R" or "Matlab".
+
+f = new FormatFile(String file, String format, Structname structname)
+
+Sets up a new FormatFile that will print objects to file in format,
+where format can be "R" or "Matlab" and will put every object into a
+structure ccalled structname.
+
+f.wopen()
+f.aopen()
+f.ropen()
+f.close()
+
+Similar to File object functions except that they don't take an argument.
+
+f.printdouble("double_name", double)
+
+Prints double to f using the name double_name.
+
+f.printvec("vector_name", vector)
+
+Print vector to file_handle in matlab format with name vector_name.
+If vector is longer than the local varible chunk_size, it is split 
+into lines of chunk_size elements or less, separated by the matlab line 
+continuation symbol "...".  
+
+f.printvec("vector_name", vector, start, end)
+
+Same as above, but only print from index start to index end.  
+The start and end indeicies are in the range 0 to vector.size()-1 , 
+i.e. the NEURON/C convention rather than Matlab convetion.  They 
+will, however, be printed in Matlab convention.
+
+f.printvec("vector_name", vector, start, end, row)
+
+Same as above, but print vector as row of matrix.  Again, indicies
+are from 0 to vector.size()-1.
+
+f.printmat("matrix_name", matrix)
+
+Prints matrix to f using the name matrix_name.
+
+*/
+
+
+begintemplate FormatFile
+
+// Public functions
+public aopen
+public ropen
+public wopen
+public close
+public printdouble
+public printvec
+public printmat
+
+// Private variables
+
+objref f                                // The file object
+strdef format                           // The format type
+strdef structname                       // Prefix string if structures present
+strdef prefix                           // Prefix string if structures present
+
+strdef openind
+strdef closeind
+strdef assop
+strdef openvec
+strdef elsep
+strdef closevec
+strdef lineend
+
+strdef tmpstr, rowstr, varname
+
+
+proc init() {
+    // Args: Filename, Format (R or matlab), structur prefix
+    start = 0
+    end = 0
+    row = 0
+    
+    f = new File($s1)
+    format = "Matlab"
+    if ( numarg() >= 2 ) {
+        format = $s2
+        if (!(!strcmp(format, "Matlab") || !strcmp(format, "R"))) {
+            print "FormatFile Error: unrecognised format specified"
+            return
+        }
+    }
+    if (!strcmp(format, "Matlab")) {
+        openind = "("
+        closeind = ")"
+        assop = "="
+        openvec = "["
+        elsep = " "
+        closevec = "]"
+        lineend = "..."
+    }
+    if (!strcmp(format, "R")) {
+        openind = "["
+        closeind = "]"
+        assop = "<-"
+        openvec = "c("
+        elsep = ","
+        closevec = ")"
+        lineend = ""
+    }
+
+    
+    structflag = 0
+    if ( numarg() >= 3 ) {
+        structflag = 1
+        structname = $s3
+        if (!strcmp(format, "Matlab")) {
+            sprint(prefix, "%s.", structname)
+        }
+        if (!strcmp(format, "R")) {
+            sprint(prefix, "%s$", structname)
+        }
+    }
+    
+
+}
+
+// Open and closing functions inherited from File except that we only
+// allow opening without a filename
+// 
+
+func aopen() {
+    return f.aopen()
+}
+
+func ropen() {
+    return f.ropen()
+}
+
+func wopen() { local ret
+    ret = f.wopen()
+    if (!strcmp(format, "R")) {
+        f.printf("%s <- list();\n", structname)
+    }
+    return ret
+}
+
+func close() {
+    return f.close()
+}
+
+//
+// Utility functions
+//
+
+//
+// x = min(double a, double b)
+// 
+// return minimum of a and b
+//
+
+func min() {
+    if ( $1 < $2 ) { return $1 } else { return $2 }
+}
+
+//
+// x = max(double a, double b)
+// 
+// return maximum of a and b
+//
+
+func max() {
+    if ( $1 > $2 ) { return $1 } else { return $2 }
+}
+
+
+//
+// Format-independent printing functions 
+// 
+
+//
+// printdouble("double_name", double)
+// 
+proc printdouble() {
+    sprint(varname, "%s%s", prefix, $s1) 
+    f.printf("%s %s ", varname, assop)
+    f.printf("%g ", $2)
+    f.printf(";\n")
+
+}
+
+//
+// printvec
+// 
+
+proc printvec() {
+    //
+    // Deal with input arguments
+    //
+    
+    sprint(varname, "%s%s", prefix, $s1) 
+    
+    if (numarg() == 2) {
+        start = 0
+        end = $o2.size() - 1
+    }
+
+    if (numarg() >= 4) {
+        start = $3
+        end = $4
+        if (start != int(start)) { error("utils.hoc:printmvec(): start value is not an integer")}
+        if (end != int(end)) { error("utils.hoc:printmvec(): end value is not an integer") }
+        if (end < start ) { error("utils.hoc:printmvec(): end value is lower than start value") }
+    }
+    
+    rowstr = ""
+    if (numarg() == 5) {
+        row = $5
+        sprint(rowstr,"%g,",row + 1)
+    }
+    
+    //     if (!strcmp(format, "Matlab")) {
+    
+    //     }
+    if (!strcmp(format, "R")) {
+        f.printf("%s <- c();\n",varname)
+    }
+    printvec_generic(varname, $o2) 
+    
+}
+
+proc printvec_generic () { local i, chunk_size,  total_size, pos, name, blockend
+    chunk_size = 10             // How many elements per line to print
+    block_size = 100            // How many elements per vector to print
+    
+//    print "row", row, start, end 
+    
+    //
+    // Print out values
+    //
+    
+    // Only print if there are values to print
+    if ( (end-start) >= 0 ) {
+
+        // Loop throgh values
+        for j = start, end {
+
+            // Split vector into new vector every block_size elements 
+            // as long as we're not at the end of the vector
+            if (((j-start) % block_size) == 0) {
+
+                // If not at the start of the vector, need to finish old 
+                // vector
+                if ( j != start ) {
+                    f.printf("%s;\n",closevec) 
+                }
+                f.printf("%s%s%s%g:%g%s %s %s ", varname, openind, rowstr, j+1, min((j+block_size),end+1),closeind, assop, openvec)
+            }
+            
+            // Newline and ... every chunk_size elements
+            if ( ( ( j - start  ) % chunk_size ) == 0 ) {
+                f.printf("%s\n", lineend) 
+            }
+            
+            // Print out element itself
+            f.printf("%g%s", $o2.x(j), elsep)
+        }
+        
+        // Print end of vector
+        f.printf("%s;\n",closevec) 
+    }
+}
+
+//
+// printmat
+//
+proc printmat () { local i, j, nrows, ncols
+    //
+    // Deal with input arguments
+    //
+    
+    sprint(varname, "%s%s", prefix, $s1) 
+    if (numarg() == 2) {
+        nrows = $o2.nrow()
+        ncols = $o2.ncol()
+    }
+    
+    // 
+    // Need to initialise matrix
+    // 
+    if (!strcmp(format, "R")) {
+        f.printf("%s <- matrix(0, nrow=%g, ncol=%g);\n", varname, nrows, ncols)
+    }
+    
+    //
+    // Print out values
+    //
+    
+    // Only print if there are values to print
+    if ( (nrows >= 1)  && (ncols >=1) ) {
+
+        // Loop throgh rows
+        for i = 0, nrows-1 {
+            
+            // Use printvec_generic
+            sprint(rowstr,"%g,",i + 1)
+            printvec_generic(varname,$o2.getrow(i))
+        }
+    }
+}
+
+    
+
+
+endtemplate FormatFile

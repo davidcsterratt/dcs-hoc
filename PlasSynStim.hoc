@@ -1,4 +1,4 @@
-fprint("PlasSynStimVer = '$Revision: 1.2 $'")
+fprint("PlasSynStim_ver = '$Revision: 1.3 $';\n")
 
 begintemplate PlasSynStim
 public loc, get_loc, get_distance

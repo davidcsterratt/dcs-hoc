@@ -1,3 +1,5 @@
+fprint("RandomLocation_ver = '$Revision: 1.2 $';\n")
+
 /*
 RandomLocation
 
@@ -14,25 +16,58 @@ There must be a default section declared to measure distance from.
 begintemplate RandomLocation
 
 public loc
-public total_length
+public total_length, dstart, dend
 objectvar seclist, ran 	
 
-proc init() {
+proc init() { local 
+    dstart = -1
+    if ( numarg () == 4) {
+        dstart = $3
+        dend = $4
+    }
     seclist = $o1
     ran = new Random($2)
     total_length = 0
-    forsec seclist { total_length = total_length + L }
+    forsec seclist { 
+        // Add length of current section 
+        total_length = total_length + L 
+
+        // Find the distance of the ends from the origin
+        d0 = distance(0)
+        d1 = distance(1)
+        
+        // This should remove any length of section beyond the 
+        // Limits specified by dstart and dend
+        if ( min(d0,d1) < dstart ) {
+            total_length = total_length - (dstart-min(d0,d1))
+        }
+        if ( max(d0,d1) > dend ) {
+            total_length = total_length - (max(d0,d1)-dend)
+        }
+    }
 }
 
 // randomize location of synapse
-func loc() {local l, done, rpos, secx, dx, gl
+func loc() {local l, done, rpos, secx, dx, gl, lsec, d0, d1
     rpos = ran.uniform(0, total_length)
     done = 0
-    l = 0
+    l = 0                       // Cumulative length
     //  distance()  // assumes soma is currently accessed         
     // sets the currently-accessed section as the origin
     forsec seclist {
-        l = l + L               // L is length of section
+        lsec = L
+        d0 = distance(0)
+        d1 = distance(1)
+        
+        // This should remove any length of section beyond the 
+        // Limits specified by dstart and dend
+        if ( min(d0,d1) < dstart ) {
+            lsec = lsec - (dstart-min(d0,d1))
+        }
+        if ( max(d0,d1) > dend ) {
+            lsec = lsec - (max(d0,d1)-dend)
+        }
+        l = l + lsec               // L is length of section
         if (l > rpos) {
             //      print l, " ", rpos, " ", L
             secx = (rpos - l + L)/L

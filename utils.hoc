@@ -1,4 +1,4 @@
-fprint("utils_ver = '$Revision: 1.10 $';\n")
+fprint("utils_ver = '$Revision: 1.11 $';\n")
 
 //
 // error(String error) 
@@ -31,6 +31,30 @@ func max() {
     if ( $1 > $2 ) { return $1 } else { return $2 }
 }
 
+// strdef utils_printformat 
+// utils_printformat = "matlab"
+
+// proc setprintformat() {
+//     if ( !strcmp($1,"matlab") || !strcmp($1,"R") ) {
+//         print "utils_printformat: Invalid format"
+//         return
+//     }
+//     utils_printformat = $1
+// }
+
+// proc setprintprefix() {
+//     // prefix, outfile
+//     utils_printprefix=$1
+    
+    
+//     if ( !strcmp($1,"matlab") || !strcmp($1,"R") ) {
+//         print "utils_printformat: Invalid format"
+//         return
+//     }
+//     utils_printformat = $1
+// }
+
+
 //
 // setprintmpar( File file, "parameter_name", parameter_value)
 // 
@@ -44,6 +68,24 @@ proc setprintmpar () {
     sprint(utils_tmpstr, "%s = %g", $s2, $3)
     execute(utils_tmpstr)
     printmdouble($o1, $3, $s2)
+    execute(utils_tmpstr)
+}
+
+//
+// setprintmstr( File file, "string_name", string_value)
+// 
+// set string_name to string_value and print
+// the string name and value to file.
+// 
+
+strdef utils_printmprefix
+strdef utils_tmpstr
+proc setprintmstr () {
+    sprint(utils_tmpstr, "strdef %s", $s2)
+    execute(utils_tmpstr)
+    sprint(utils_tmpstr, "%s = \"%s\"", $s2, $s3)
+    execute(utils_tmpstr)
+    printmstr($o1, $s3, $s2)
     execute(utils_tmpstr)
 }
 
@@ -155,22 +197,206 @@ proc printmvec () { local i, chunk_size, start, end, total_size, pos, name, bloc
     }
 }
 
-objref utils_p 
-proc test_pointer () {
-    utils_p = new Pointer($s1)
-    print utils_p.val
-    print utils_p.s
+
+//
+// setprintmpar( File file, "parameter_name", parameter_value)
+// 
+// set parameter of paramater_name to parameter_value and print
+// the parameter name and value to file in R format.
+// 
+
+strdef utils_printmprefix
+proc setprintmpar () {
+    sprint(utils_tmpstr, "%s = %g", $s2, $3)
+    execute(utils_tmpstr)
+    printmdouble($o1, $3, $s2)
+    execute(utils_tmpstr)
 }
-       
-proc test_local () { local a 
-    execute1("a = b",this)
-   // a = b
-    a = a + 1 
-    print a
-    execute1("b = a",this)
-  //  b = a
-    print b
+
+//
+// setprintmstr( File file, "string_name", string_value)
+// 
+// set string_name to string_value and print
+// the string name and value to file in R-format.
+// 
+
+proc setprintmstr () {
+    sprint(utils_tmpstr, "strdef %s", $s2)
+    execute(utils_tmpstr)
+    sprint(utils_tmpstr, "%s = \"%s\"", $s2, $s3)
+    execute(utils_tmpstr)
+    printmstr($o1, $s3, $s2)
+    execute(utils_tmpstr)
 }
+
+//
+// printmstr(file_handle, string, "string_name")
+// 
+// Print string to file_handle in R format with name string_name.
+// 
+
+proc printmstr () { 
+    $o1.printf("%s%s <- ", utils_printmprefix, $s3)
+    $o1.printf("'%s' ", $s2)
+    $o1.printf(" ;\n")
+}
+
+//
+// printmdouble(file_handle, double, "double_name")
+// 
+// Print double to file_handle in R format with name double_name
+// 
+
+proc printmdouble () { 
+    $o1.printf("%s%s <-  ", utils_printmprefix, $s3)
+    $o1.printf("%g ", $2)
+    $o1.printf(" ;\n")
+}
+
+//
+// printmvec(file_handle, vector, "vector_name")
+// 
+// Print vector to file_handle in R format with name vector_name.
+// If vector is longer than the local varible chunk_size, it is split 
+// into lines of chunk_size elements or less, separated by the matlab line 
+// continuation symbol "...".  
+// 
+// printmvec(file_handle, vector, "vector_name", start, end)
+// 
+// Same as above, but only print from index start to index end.  
+// The start and end indeicies are in the range 0 to vector.size()-1 , 
+// i.e. the NEURON/C convention rather than Matlab convetion.  They 
+// will, however, be printed in Matlab convention.
+//
+// printmvec(file_handle, vector, "vector_name", start, end, row)
+// 
+// Same as above, but print vector as row of matrix.  Again, indicies
+// are from 0 to vector.size()-1.
+
+
+proc printmvec () { local i, chunk_size, start, end, total_size, pos, name, blockend, row
+    chunk_size = 10             // How many elements per line to print
+    block_size = 100            // How many elements per vector to print
+    utils_tmpstr = ""
+    
+    //
+    // Deal with input arguments
+    //
+    
+    if (numarg() == 3) {
+        start = 0
+        end = $o2.size() - 1
+    }
+
+    if (numarg() >= 5) {
+        start = $4
+        end = $5
+        if (start != int(start)) { error("utils.hoc:printmvec(): start value is not an integer")}
+        if (end != int(end)) { error("utils.hoc:printmvec(): end value is not an integer") }
+        if (end < start ) { error("utils.hoc:printmvec(): end value is lower than start value") }
+    }
+
+    if (numarg() == 6) {
+        row = $6
+        sprint(utils_tmpstr,"%g,",row + 1)
+    }
+    
+    //
+    // Print out values
+    //
+    
+    // Only print if there are values to print
+    if ( (end-start) >= 0 ) {
+        
+        // 
+        // Need to initialise vector
+        // 
+    $o1.printf("%s%s <- c();", utils_printmprefix, $s3)
+
+        
+        // Loop throgh values
+        for j = start, end {
+
+            // Split vector into new vector every block_size elements 
+            // as long as we're not at the end of the vector
+            if (((j-start) % block_size) == 0) {
+
+                // If not at the start of the vector, need to finish old 
+                // vector
+                if ( j != start ) {
+                    $o1.printf(");\n") 
+                }
+                $o1.printf("%s%s[%s%g:%g] <- c( ", utils_printmprefix, $s3, utils_tmpstr, j+1, min((j+block_size),end+1))
+            }
+            
+            // Newline and ... every chunk_size elements
+            if ( ( ( j - start  ) % chunk_size ) == 0 ) {
+                $o1.printf(" \n") 
+            }
+            
+            // Print out element itself
+            $o1.printf("%g, ", $o2.x(j))
+        }
+        
+        // Print end of vector
+        $o1.printf(");\n") 
+    }
+}
+
+//
+// printmmat(file_handle, matrix, "matrix_name")
+// 
+// Print vector to file_handle in R format with name vector_name.
+// If vector is longer than the local varible chunk_size, it is split 
+// into lines of chunk_size elements or less, separated by the matlab line 
+// continuation symbol "...".  
+// 
+
+proc printmmat () { local i, j, nrows, ncols, chunk_size, start, end, total_size, pos, name, blockend, row
+    chunk_size = 10             // How many elements per line to print
+    block_size = 100            // How many elements per vector to print
+    utils_tmpstr = ""
+    
+    //
+    // Deal with input arguments
+    //
+    
+    if (numarg() == 3) {
+        nrows = $o2.nrow()
+        ncols = $o2.ncol()
+    }
+    
+    // 
+    // Need to initialise matrix
+    // 
+    $o1.printf("%s%s <- matrix(0, nrow=%g, ncol=%g);", utils_printmprefix, $s3, nrows, ncols)
+    
+    //
+    // Print out values
+    //
+    
+    // Only print if there are values to print
+    if ( (nrows >= 1)  && (ncols >=1) ) {
+
+        // Loop throgh rows
+        for i = 1, nrows {
+            
+            // Start of row
+            $o1.printf("%s%s[%g,] = c( ", utils_printmprefix, $s3, i)
+            
+            // Loop through columns
+            for j = 1, ncols {
+                
+                // Print out element itself
+                $o1.printf("%g, ", $o2.x[i-1][j-1])
+            }
+            
+            // Print end of row
+            $o1.printf(");\n") 
+        }
+    }
+}
+
 
 //
 // SpikeList - list of neurons and spike times
