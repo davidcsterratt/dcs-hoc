@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sFormatFile = $Revision: 1.4 $, ",pkgversions)
+sprint(pkgversions,"%sFormatFile = $Revision: 1.5 $, ",pkgversions)
 
 /*
 
@@ -54,6 +54,11 @@ f.printmat("matrix_name", matrix)
 
 Prints matrix to f using the name matrix_name.
 
+f.printlistasmat("matrix_name", list)
+
+Prints list where each element is a vector as a matrix to f using 
+the name matrix_name.  At the moment every vector should be the same
+length; there is no error checking in the function.
 
 f.printstr("string_name", string)
 
@@ -82,6 +87,7 @@ public close
 public printdouble
 public printvec
 public printmat
+public printlistasmat
 public printstr
 public setprintdouble
 public setprintstr
@@ -104,6 +110,7 @@ strdef lineend
 
 strdef tmpstr, rowstr, varname
 
+objref tmpmat
 
 proc init() {
     // Args: Filename, Format (R or matlab), structur prefix
@@ -182,6 +189,7 @@ func ropen() {
 }
 
 func wopen() { local ret
+    wopened_flag=0
     ret = f.wopen()
     print_structname()
     return ret
@@ -353,6 +361,17 @@ proc printmat () { local i, j, nrows, ncols
             printvec_generic(varname,$o2.getrow(i))
         }
     }
+}
+
+//
+// printlistasmat
+// 
+proc printlistasmat () { local i
+    tmpmat = new Matrix($o2.count(), $o2.object(0).size())
+    for i=0,$o2.count()-1 {
+        tmpmat.setrow(i, $o2.object(i))
+    }
+    printmat($s1, tmpmat)
 }
 
 //
