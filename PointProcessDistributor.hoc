@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sPointProcessDistributor = $Revision: 1.3 $, ",pkgversions)
+sprint(pkgversions,"%sPointProcessDistributor = $Revision: 1.4 $, ",pkgversions)
 
 /*
 PointProcessDistributor
@@ -92,6 +92,9 @@ func distribute_pps_from_list () { local  i, N
     pplist = $o1
     N = pplist.count()
     if (N == 0) { return(1) }
+    if (numarg()==2) { $o2 = new Vector(N) }
+    
+    
     
     // Set up uniform distribution between 0 and relprob.sum()
     ran.uniform(0, relprob.sum() )
@@ -117,7 +120,7 @@ func distribute_pps_from_list () { local  i, N
         while ( RP.x(RPind) < culmrelprob ) {
             // Locate the point process
             seglist.srl.object(i).secref.sec pplist.object(RPind).loc(seglist.srl.object(i).x)
-            
+            if (numarg()==2) { $o2.x(RPind)=i }
             RPind = RPind + 1 
             if (RPind == N) { break }
         }
