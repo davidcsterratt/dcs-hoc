@@ -10,4 +10,6 @@ parents.x(0) = 0
 tp.plot(vec,vec,parents)
 tp.set_xlab("time /\\mu s")
 tp.set_ylab("value /\\Omega pound")
-tp.rprintfile("/tmp/test_TreePlot.ps")
+tp.auto_limits_on(1,1,1,1)
+tp.view_equal_plot()
+tp.rprintfile("/tmp/test_TreePlot.ps",1)
