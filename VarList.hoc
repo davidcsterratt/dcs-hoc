@@ -1,5 +1,9 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sVarList = $Revision: 1.6 $, ",pkgversions)
+sprint(pkgversions,"%sVarList = $Revision: 1.7 $, ",pkgversions)
+
+//
+// TODO: implement units setting using the units command.
+// 
 
 load_file("FormatFile.hoc")
 
@@ -148,7 +152,7 @@ public execute_actions
 public xstatebutton, xvalue
 
 objref l, f, this, ldfile
-strdef tmpstr
+strdef tmpstr, path
 
 proc init() {
     l = new List()
@@ -242,9 +246,13 @@ proc execute_actions() { local i
 }
 
 proc save() {
-    if (numarg() == 0) {
+    if ((numarg() == 0) || numarg() == 2) {
         f = new FormatFile("","hoc")
-        f.chooser("w","Save Parameters to file","*.hoc")
+        if (numarg() == 2) {
+            f.chooser("w","Save Parameters to file","*.hoc","Save","Cancel",$s2)
+        } else {
+            f.chooser("w","Save Parameters to file","*.hoc","Save","Cancel")
+        }
         f.chooser()
     } else {
         f = new FormatFile($s1,"hoc")
@@ -257,13 +265,21 @@ proc save() {
 
 // Procedure to load from file adapted from stdrun.hoc
 proc load() {
-	if (object_id(ldfile) == 0) {
-		ldfile = new File()
-	}
-	ldfile.chooser("r", "Load", "*.hoc", "Load", "Cancel", getcwd())
-	if (ldfile.chooser()) {
-			load_file(1, ldfile.getname)
-	}
+    path = "."
+    if (numarg() == 2) {
+        sprint(path,"%s/%s",path,$s2)
+    }
+    if ((numarg() == 0) || numarg() == 2) {
+	      if (object_id(ldfile) == 0) {
+		        ldfile = new File()
+	      }
+	      ldfile.chooser("r", "Load", "*.hoc", "Load", "Cancel", path)
+	      if (ldfile.chooser()) {
+			      load_file(1, ldfile.getname)
+	      }
+    } else {
+        load_file(1, $s1)
+    }
 }
 
 func find () { local i
