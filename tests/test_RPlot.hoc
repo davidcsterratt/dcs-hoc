@@ -1,0 +1,23 @@
+load_file("RPlot.hoc")
+load_file("TreePlotArray.hoc")
+
+objref g, vec
+g = new Graph()
+vec = new Vector(10)
+vec.indgen(0,1)
+vec.line(g)
+vec.indgen(0,2)
+vec.line(g,3,2)
+
+vi = g.view_info()
+print vi
+objref rp
+rp = new RPlot("/tmp/test_RPlot")
+rp.set_width(4)
+rp.set_height(4)
+rp.start_plot("/tmp/test_RPlot.ps")
+rp.add_graph(g,"x","y")
+rp.end_plot()
+rp.run()
+
+
