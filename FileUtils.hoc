@@ -1,0 +1,31 @@
+if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
+sprint(pkgversions,"%sFileUtils = $Revision: 1.1 $, ",pkgversions)
+
+begintemplate FileUtils
+public basename, dirname, tempdirname
+
+objref sf, f
+strdef tmpstr
+
+proc init() {
+    sf = new StringFunctions()
+}
+
+proc basename() {
+    pos = sf.head($s1,"/[^/]+$",tmpstr)
+    tmpstr = $s1
+    sf.right(tmpstr,pos+1)
+    $s2 = tmpstr
+}
+
+proc dirname() {
+    pos = sf.head($s1,"/[^/]+$",$s2)
+}
+
+proc tempdirname () {
+    f = new File()
+    f.mktemp()
+    $s1 = f.getname()
+}
+    
+endtemplate FileUtils

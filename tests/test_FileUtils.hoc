@@ -1,0 +1,21 @@
+load_file("FileUtils.hoc")
+
+objref fu
+fu = new FileUtils()
+
+strdef filename
+filename = "/home/dcs/hello/blee.hoc"
+
+print "Filename:", filename
+
+strdef result
+fu.basename(filename,result)
+print "Basename:", result
+
+fu.dirname(filename,result)
+print "Dirname:", result
+
+
+fu.tempdirname(result) 
+print "Tempdirname:", result
+
