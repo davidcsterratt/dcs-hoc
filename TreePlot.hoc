@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sTreePlot = $Revision: 1.3 $, ",pkgversions)
+sprint(pkgversions,"%sTreePlot = $Revision: 1.4 $, ",pkgversions)
 
 begintemplate TreePlot
 
@@ -27,6 +27,8 @@ proc plot() { local i
     xvec = $o1
     yvec = $o2
     parentsvec = $o3
+    // So that crosshair_action works, do invisible line
+    yvec.line(graph,xvec,0,1)
     if (lines_flag) {
         for i=0, xvec.size()-1 { 
             tmpxvec.x(0) = xvec.x(i)
