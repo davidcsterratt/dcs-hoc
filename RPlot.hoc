@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sRPlot = $Revision: 1.4 $, ",pkgversions)
+sprint(pkgversions,"%sRPlot = $Revision: 1.5 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
 load_file("utils.hoc")
@@ -17,9 +17,11 @@ objref xveclist, yveclist
 objref rfile
 strdef rfilename
 objref li, lilist
-strdef xlab, ylab
+strdef xlab, ylab, rxlab, rylab
 strdef cmd
 objref oc
+strdef texlab, rlab, tmp
+objref sf
 
 proc init() {
     xvec = new Vector()
@@ -91,17 +93,20 @@ proc add_graph() { local limits_set
         ymin = $o1.get_limit(3)
         ymax = $o1.get_limit(4)
     }
+    textoRtext(xlab, rxlab)
+    textoRtext(ylab, rylab)
+    
     rfile.aopen()
     rfile.print_VectorList("xvec",xveclist)
     rfile.print_VectorList("yvec",yveclist)
     rfile.print_VectorList("li",lilist)
 
     if (limits_set) {
-        rfile.f.printf("plot(NA,NA,xlim=c(%g,%g),ylim=c(%g,%g),xlab=\"%s\",ylab=\"%s\")\n",xmin,xmax,ymin,ymax,xlab,ylab) 
+        rfile.f.printf("plot(NA,NA,xlim=c(%g,%g),ylim=c(%g,%g),xlab=%s,ylab=%s)\n",xmin,xmax,ymin,ymax,rxlab,rylab) 
     } else {
         rfile.printf("plot(NA,NA,")
         rfile.printf("xlim=c(min(sapply(xvec,min)),max(sapply(xvec,max))),                            ylim=c(min(sapply(yvec,min)),max(sapply(yvec,max))),")
-        rfile.f.printf("xlab=\"%s\",ylab=\"%s\")\n",xlab,ylab)
+        rfile.f.printf("xlab=%s,ylab=%s)\n",rxlab,rylab)
     }
     rfile.printf("\
     for (i in 1:length(xvec)) {\
@@ -140,5 +145,36 @@ proc plot() {
 proc clear() {
     rfile.unlink()
 }
-        
+
+proc textoRtext() {
+    texlab = $s1
+    sf = new StringFunctions()
+    rlab = "expression(paste("
+    while (( ind = sf.substr(texlab,"\\")) != -1) {
+        //    print texlab, "]"
+        //     print rlab, "]"
+        sf.head(texlab,"\\\\",tmp) 
+        if (sf.len(tmp)) {
+            sprint(rlab,"%s\"%s\",",rlab,tmp)
+        }
+        sf.right(texlab,ind+1)               // Get rid of backslash with +1
+        ind = sf.substr(texlab," ")
+        if (ind==0) {
+            sf.right(texlab,ind)      // Keep space straight after backslash
+            //        print "space"
+            continue
+        }
+        ind = sf.head(texlab,"[ \\\\]",tmp) 
+        sprint(rlab,"%s%s,",rlab,tmp)
+        if (sf.substr(texlab,"\\") == ind) { 
+            sf.right(texlab,ind)         // backslash; don't remove
+        } else {
+            sf.right(texlab,ind+1)            // space; remove
+        }
+    }
+    sprint(rlab,"%s\"%s\"))",rlab,texlab)
+    $s2 = rlab
+}
+
+
 endtemplate RPlot
