@@ -17,6 +17,9 @@ objref p2
 p2 = new VectorVar("vec")
 p2.printf()
 
+
+objref null
+
 objref pl
 pl = new VarList()
 b = 2
@@ -26,6 +29,9 @@ pl.appendString("s")
 pl.appendSetDouble("c", 7.3846,"print c")
 pl.appendSetString("y", "hello","print y")
 pl.appendVector("vec")
+pl.appendVector("null")
+pl.appendVector("vec")                  // Duplicate; should replace previous
+pl.printf()
 
 objref f
 f = new FormatFile("blee","hoc")
