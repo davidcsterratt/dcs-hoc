@@ -98,6 +98,39 @@ proc fprint() {
 endtemplate VectorVar
 
 //
+// VectorListVar
+// 
+
+begintemplate VectorListVar
+
+public name, ptr, type, action
+public printf, fprint
+
+strdef name, cmd, action
+objref ptr, this
+
+// new Var("name")
+proc init() {
+    sprint(name,"%s",$s1)
+    sprint(cmd,"%s.ptr = %s", this, name)
+    execute1(cmd)
+    if (numarg() >= 2) {
+        sprint(action,"%s",$s2)
+    }
+}
+
+proc printf() { local i
+    print name, " = "
+    for i=0,ptr.count()-1 {
+        ptr.object(i).printf()
+    }
+}
+proc fprint() {
+    $o1.printlistasmat(name, ptr)
+}
+endtemplate VectorListVar
+
+//
 // VarList
 // 
 
@@ -107,7 +140,10 @@ public append
 public appendDouble, appendSetDouble 
 public appendString, appendSetString
 public appendVector
-public printf, printf_actions, fprint, fprint_actions
+public appendVectorList
+public printVarNames
+public printf, printf_actions 
+public fprint, fprint_actions
 public save, load
 public execute_actions
 public xstatebutton, xvalue
@@ -115,12 +151,10 @@ public xstatebutton, xvalue
 objref l, f, this, ldfile
 strdef tmpstr
 
-// new Var("name")
 proc init() {
     l = new List()
 }
 
-// Can't use name "print"
 proc append() {
     l.append($o1)
 }
@@ -171,6 +205,20 @@ proc appendVector() {
     } else {
         l.append(new VectorVar($s1))
     }        
+}
+
+proc appendVectorList() {
+    if ( numarg() >= 2 ) {
+        l.append(new VectorListVar($s1,$s2))
+    } else {
+        l.append(new VectorListVar($s1))
+    }        
+}
+
+proc printVarNames() { local i
+    for i=0, l.count()-1 {
+        print l.object(i).name
+    }
 }
 
 proc printf() { local i
