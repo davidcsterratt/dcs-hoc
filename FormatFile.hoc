@@ -51,6 +51,21 @@ f.printmat("matrix_name", matrix)
 
 Prints matrix to f using the name matrix_name.
 
+
+f.printstr("string_name", string)
+
+Print string to file_handle in matlab format with name string_name.
+
+f.setprintdouble("parameter_name", parameter_value)
+ 
+Set parameter of paramater_name to parameter_value and print the
+parameter name and value to file.
+
+f.setprintstr("string_name", string_value)
+
+set string_name to string_value and print
+the string name and value to file.
+
 */
 
 
@@ -64,6 +79,9 @@ public close
 public printdouble
 public printvec
 public printmat
+public printstr
+public setprintdouble
+public setprintstr
 
 // Private variables
 
@@ -88,6 +106,7 @@ proc init() {
     start = 0
     end = 0
     row = 0
+    wopened_flag = 0
     
     f = new File($s1)
     format = "Matlab"
@@ -137,8 +156,20 @@ proc init() {
 // allow opening without a filename
 // 
 
-func aopen() {
-    return f.aopen()
+// For R
+
+proc print_structname () {
+    if (!strcmp(format, "R") && (wopened_flag==0) && (structflag==1)) {
+        f.printf("%s <- list();\n", structname)
+        wopened_flag = 1
+    }
+}
+
+
+func aopen() { local ret
+    ret = f.aopen()
+    print_structname()  
+    return ret
 }
 
 func ropen() {
@@ -147,9 +178,7 @@ func ropen() {
 
 func wopen() { local ret
     ret = f.wopen()
-    if (!strcmp(format, "R")) {
-        f.printf("%s <- list();\n", structname)
-    }
+    print_structname()
     return ret
 }
 
@@ -293,6 +322,10 @@ proc printmat () { local i, j, nrows, ncols
         ncols = $o2.ncol()
     }
     
+    // Naughty communication to printvec_generic
+    start = 0
+    end = ncols-1
+    
     // 
     // Need to initialise matrix
     // 
@@ -306,18 +339,54 @@ proc printmat () { local i, j, nrows, ncols
     
     // Only print if there are values to print
     if ( (nrows >= 1)  && (ncols >=1) ) {
-
+        
         // Loop throgh rows
         for i = 0, nrows-1 {
             
             // Use printvec_generic
             sprint(rowstr,"%g,",i + 1)
             printvec_generic(varname,$o2.getrow(i))
+            print "matrowsize", $o2.nrow(), $o2.ncol()
+            
         }
     }
 }
 
-    
+//
+// f.printstr("string_name", string)
+// 
 
+proc printstr () { 
+    f.printf("%s%s %s ", prefix, $s1, assop)
+    f.printf("'%s' ", $s2)
+    f.printf(" ;\n")
+}
+
+
+
+//
+// f.setprintdouble("parameter_name", parameter_value)
+// 
+// set parameter of paramater_name to parameter_value and print
+// the parameter name and value to file.
+// 
+
+proc setprintdouble () {
+    sprint(tmpstr, "%s = %g", $s1, $2)
+    execute(tmpstr)
+    printdouble($s1, $2)
+}
+
+//
+// f.setprintmstr("string_name", string_value)
+// 
+
+proc setprintstr () {
+    sprint(tmpstr, "strdef %s", $s1)
+    execute(tmpstr)
+    sprint(tmpstr, "%s = \"%s\"", $s1, $s2)
+    execute(tmpstr)
+    printstr($s1, $s2)
+}
 
 endtemplate FormatFile
