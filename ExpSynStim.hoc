@@ -1,20 +1,40 @@
+/*
+
+ExpSynStim - exponential synapse with netstim stimulus
+
+ess = new ExpSynStim()  - creates ExpSynStim ess
+ess.loc(x)              - locates at x on the current section
+ess.get_loc()           - returns relative location along the section
+ess.get_distance()      - returns distance from origin specified by distance()
+
+*/
+
 begintemplate ExpSynStim
-public loc, get_loc
+
+public loc, get_loc, get_distance
 public expsyn, netcon, netstim 
 objref expsyn, netcon, netstim 
 
 proc init() {
-  expsyn = new ExpSyn(0.5)
-  netstim = new NetStim(0.5)
-  netcon = new NetCon(netstim,expsyn)
+    expsyn = new ExpSyn(0.5)
+    netstim = new NetStim(0.5)
+    netcon = new NetCon(netstim,expsyn)
 }
 
 proc loc() {
-  expsyn.loc($1)
+    expsyn.loc($1)
 }
 
 func get_loc() {
-  return expsyn.get_loc()
+    x =  expsyn.get_loc()
+    pop_section()                 // needed to keep the stack in order
+    return x
+}
+
+func get_distance() {
+    dist = distance(expsyn.get_loc()) // Seems to work, though not documented
+    pop_section()                 // needed to keep the stack in order
+    return dist
 }
 
 endtemplate ExpSynStim
