@@ -8,3 +8,24 @@ tpa1 = new TreePlotArray(2,3)
 tpa2 = new TreePlotArray(2,2)
 d.intercept(0)
 d.map
+d.flip_to(0)
+
+
+objref glist[6], parents, vec
+vec = new Vector(10)
+vec.indgen(0,1)
+parents = vec.c
+parents.indgen(-1,1)
+parents.x(0) = 0
+for i=0,1 {
+    for j=0,2 {
+        tpa1.cellref(glist[i*3+j],i,j)
+        glist[i*3+j].lines(i)
+        glist[i*3+j].marks(j)
+        glist[i*3+j].plot(vec,vec,parents)
+        glist[i*3+j].set_xlab("time /ms")
+        glist[i*3+j].set_ylab("value /mpound")
+    }
+}
+
+tpa1.rplot("/tmp/test_TreePlotArray.ps")
