@@ -1,11 +1,14 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sTreePlot = $Revision: 1.5 $, ",pkgversions)
+sprint(pkgversions,"%sTreePlot = $Revision: 1.6 $, ",pkgversions)
 
 begintemplate TreePlot
 
 objref graph, xvec, yvec, diamvec, parentsvec
 objref tmpxvec, tmpyvec
+objref xmarklist, ymarklist
 public plot, lines, marks
+public getline, line_info, view_info
+public getmarks
 public graph, xvec, yvec, diamvec, parentsvec, view, size
 public view_equal_plot, auto_limits_on, set_limits
 
@@ -23,6 +26,8 @@ proc init() { local i
     }
     tmpxvec = new Vector(2)
     tmpyvec = new Vector(2)
+    xmarklist = new List()
+    ymarklist = new List()
     colour=1
     lines_flag=1
     marks_flag=0
@@ -46,6 +51,8 @@ proc plot() { local i
     }
     if (marks_flag) { 
         yvec.mark(graph,xvec,"o",6,colour)
+        xmarklist.append(xvec)
+        ymarklist.append(yvec)
     }
     colour +=1
     if (colour == 10) colour=1
@@ -69,6 +76,36 @@ proc view() {
 // Clone of Graph.size()
 proc size() {
     graph.size($1,$2,$3,$4)
+}
+
+// Clone of Graph.getline()
+func getline() {
+    return graph.getline($1,$o2,$o3)
+}
+
+// Analogue of getline() for marks
+func getmarks() { local i
+    i = $1
+    i += 1
+    if (i <= (xmarklist.count()-1)) {
+        $o2 = xmarklist.object(i).cl
+        $o3 = ymarklist.object(i).cl
+    } else {
+        i = -1
+    }
+    return i 
+}
+
+// Clone of Graph.view_info()
+func view_info() {
+    if (numarg() == 0 ) { return graph.view_info() }
+    if (numarg() == 2 ) { return graph.view_info($1,$2) }
+    return -1
+}
+
+// Clone of Graph.line_info()
+func line_info() {
+    return graph.line_info($1,$o2)
 }
 
 // Set manual limits which will be respected by view_equal_plot() in
