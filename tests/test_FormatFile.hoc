@@ -2,6 +2,7 @@ load_file("FormatFile.hoc")
 
 objref vec, outfile
 objref mat
+chooser_test=0
 
 proc print_tests() {
     // Double
@@ -63,5 +64,21 @@ outfile.wopen()
 print_tests()
 outfile.close()
 
+// Chooser test
+if (chooser_test==1) {
+    outfile = new FormatFile("","R")
+    outfile.chooser("w","Hello")
+    outfile.chooser()
+    outfile.wopen()
+    print_tests()
+    outfile.close()
+}
+
+// Hoc test
+
+outfile = new FormatFile("/tmp/test_FormatFile","hoc")
+outfile.wopen()
+print_tests()
+outfile.close()
 
 
