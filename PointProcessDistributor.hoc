@@ -1,41 +1,133 @@
-fprint("PointProcessDistributor_ver = '$Revision: 1.1 $';\n")
+fprint("PointProcessDistributor_ver = '$Revision: 1.2 $';\n")
 
 /*
 PointProcessDistributor
 
-ppd = new PointProcessDistributor(SectionList)
-ppd.loc(PointProcess)
+ppd = new PointProcessDistributor(double seed)
 
-relocates the PointProcess to a random location with respect to
-uniform distribution based on position.
-SectionList defines the set of sections to sample.
-PointProcess must have a loc() member function.
-There must be a default section declared to measure distance from.
+Initialises the PointProcessDistributor ppd with seed for random
+number generation.
+
+ppd.setup_probs_from_seglist_with_refaxis() (SegmentList seglist, ReferenceAxis ra String expr)
+
+Assigns relative probabilities of placement to each segement in the
+SegmentList seglist on the basis of the expression expr which can
+contain the following variables:
+
+H - projection of segment onto reference axis ra
+d - mean diameter of segment
+l - length of segment.  
+
+ppd.distribute_pps_from_list(List pplist)
+
+Distribute point processes from the list pplist over the segments
+contained in the seglist argument given to the setup function.
+
 */
 
 begintemplate PointProcessDistributor
 
-public loc, distribute_array, setup
+// Public variables
+
 public total_length, dist, lengths, relprob
-objectvar seclist, ran 	
-strdef distexpr                 // The expression of the distribution as a string
+
+// Public functions
+
+public setup_probs_from_seglist_with_refaxis
+public distribute_pps_from_list
+
+public loc, distribute_array, setup     // obselete?
+
+// Private variables
+
+objectvar seclist, ran, seglist, refaxis
+strdef distexpr                         // The expression of the distribution as a string
+objref lengths                          // Lengths of each segment
+objref relprob                          // Relative probability of pp in segment
+objref RP                               // Vector to store culumulative relative prob
+objref pplist                           // List of point processes to add
+
+objref this                             // Self-pointer
 strdef tmpstr
-objref lengths                  // Lengths of each segment
-objref relprob                  // Relative probability of pp in segment
-objref this                     // Self-pointer
-objref RP                       // Vector to store culumulative relative prob
+
+// Function declarations
 
 proc init() { 
     ran = new Random($1)
     d = 0
     l = 0 
     rp = 0
+    i = 0                               // Index must be visible in this
+}
+
+proc setup_probs_from_seglist_with_refaxis() { 
+    seglist = $o1
+    refaxis = $o2
+    distexpr = $s3
+    lengths = new Vector()
+    relprob = new Vector()
+    
+    for i=0, seglist.srl.count()-1 {
+        // Path distance
+        // We could get the path distance with 
+        // seglist.srl.object(i).secref.sec s = distance(seglist.srl.object(i).x)
+        // but we wouldn't be able to incorporate it into expressions with 
+        // h, l and d.  This will require a change to ReferenceAxis.hoc to fix
+        
+        // Calculate and store the relative probability
+        sprint(tmpstr,"rp = refaxis.apply_expr_to_segref(seglist.srl.object(i),\"%s\")",distexpr)
+        execute(tmpstr,this)
+        relprob.append(rp)
+    }
+}
+
+// distribute_pps_from_list(List pplist)
+func distribute_pps_from_list () { local  i, N
+    if ( relprob.sum() == 0 ) { 
+        print "PointProcessDistributor: Warning: No Point processes fall in the range specified"
+        return 0
+    }
+    // Read in the point process list
+    pplist = $o1
+    N = pplist.count()
+    if (N == 0) { return(1) }
+    
+    // Set up uniform distribution between 0 and relprob.sum()
+    ran.uniform(0, relprob.sum() )
+    
+    // Sample from the distribution
+    RP = new Vector(N)
+    RP.setrand(ran)
+    RP.sort()
+    
+    RPind = 0
+    culmrelprob = 0 
+    
+    // Look at all the segments
+    for i = 0, seglist.srl.count()-1 {
+        // Add the probablilty for this segment to the culumuative 
+        // probability distribution and increment the counter 
+        //            print relprobind, relprob.size()
+        culmrelprob = culmrelprob + relprob.x(i)
+        
+        // Has the culmulative distribution exceeded the 
+        // culmulative values for any synapses we want to add?
+        //            print "1:", RPind, RP.size()
+        while ( RP.x(RPind) < culmrelprob ) {
+            // Locate the point process
+            seglist.srl.object(i).secref.sec pplist.object(RPind).loc(seglist.srl.object(i).x)
+            
+            RPind = RPind + 1 
+            if (RPind == N) { break }
+        }
+        if (RPind == N) { break }
+    }
+    return(0)
 }
 
 proc setup() { local ltot, a
-    this = $o1
-    seclist = $o2
-    distexpr = $s3
+    seclist = $o1
+    distexpr = $s1
 
     lengths = new Vector()
     relprob = new Vector()
@@ -132,11 +224,16 @@ func distribute_array () { local  i, N
     return(1)
 }
 
+//ppd.loc(PointProcess p)
+
+//relocates the PointProcess to a random location with respect to
+//uniform distribution based on position.
+//SectionList defines the set of sections to sample.
+//PointProcess must have a loc() member function.
+//There must be a default section declared to measure distance from.
+
+
 endtemplate PointProcessDistributor
-
-// distribute_pp("arrname",n,"distexpr")
-
-//proc distribute_pp {
 
 
 
