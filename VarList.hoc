@@ -1,0 +1,156 @@
+load_file("FormatFile.hoc")
+
+begintemplate DoublePar
+
+public name, ptr, type, action
+public printf, fprint
+
+strdef name, tmpstr, action
+objref ptr
+
+// new Par("name")
+proc init() {
+    sprint(name,"%s",$s1)
+    ptr = new Pointer(name)
+    if (numarg() >= 2) {
+        sprint(action,"%s",$s2)
+    }
+}
+
+proc printf() {
+    print name, " = ", ptr.val
+}
+proc fprint() {
+    $o1.printdouble(name, ptr.val)
+}
+endtemplate DoublePar
+
+
+begintemplate StringPar
+
+public name, ptr,  type, str, action
+public printf, fprint
+
+strdef name, cmd, str, action
+objref this
+
+// new Par("name")
+proc init() {
+    sprint(name,"%s",$s1)
+    if (numarg() >= 2) {
+        sprint(action,"%s",$s2)
+    }
+}
+
+proc printf() {
+    sprint(cmd,"%s.str = %s",this, name)
+    execute1(cmd) 
+    print name, " = ", str
+}
+
+proc fprint() {
+    sprint(cmd,"%s.str = %s",this, name)
+    execute1(cmd) 
+    $o1.printstr(name,str)    
+}
+
+endtemplate StringPar
+
+
+begintemplate ParList
+
+public append
+public appendDouble, appendSetDouble 
+public appendString, appendSetString
+public printf, printf_actions, fprint, fprint_actions
+public save_hoc , load
+public execute_actions
+public l
+
+objref l, f, this
+strdef tmpstr
+
+// new Par("name")
+proc init() {
+    l = new List()
+}
+
+// Can't use name "print"
+proc append() {
+    l.append($o1)
+}
+
+proc appendDouble() {
+    if ( numarg() >= 2 ) {
+        l.append(new DoublePar($s1,$s2))
+    } else {
+        l.append(new DoublePar($s1))
+    }
+}
+    
+
+proc appendSetDouble() {
+    sprint(tmpstr,"%s = %g",$s1, $2)
+    execute1(tmpstr)
+    if ( numarg() >= 3 ) {
+        appendDouble($s1,$s3)
+    } else {
+        appendDouble($s1)
+    }
+}
+
+
+proc appendString() {
+    if ( numarg() >= 2 ) {
+        l.append(new StringPar($s1,$s2))
+    } else {
+        l.append(new StringPar($s1))
+    }        
+}
+
+proc appendSetString() {
+    sprint(tmpstr, "strdef %s", $s1)
+    execute(tmpstr)
+    sprint(tmpstr,"%s = \"%s\"",$s1, $s2)
+    execute(tmpstr)
+    if ( numarg() >= 3 ) {
+        appendString($s1,$s3)
+    } else {
+        appendString($s1)
+    }        
+}
+
+proc printf() { local i
+    for i= 0, l.count()-1 { l.object(i).printf() } 
+}
+
+proc printf_actions() { local i
+    for i= 0, l.count()-1 { print l.object(i).action } 
+}
+
+// fprint(FormatFile f)
+proc fprint() { local i
+    for i= 0, l.count()-1 { l.object(i).fprint($o1) } 
+}
+
+proc fprint_actions() { local i
+    for i= 0, l.count()-1 { $o1.printf("%s\n",l.object(i).action) } 
+}
+
+proc execute_actions() { local i
+    for i= 0, l.count()-1 { execute(l.object(i).action) } 
+}
+
+proc save_hoc() {
+    f = new FormatFile($s1,"hoc")
+    f.wopen()
+    fprint(f)
+    fprint_actions(f)
+    f.close()
+}
+
+// Procedure to load from file
+proc load() {
+}
+
+endtemplate ParList
