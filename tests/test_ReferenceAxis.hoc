@@ -36,7 +36,7 @@ func test_area() { local failflag, nrnarea
     failflag = 0
     dend nseg = $1
     dend dendsegs = new SegmentRefList()
-    dend dendsegs.append_internal_segments_from_section()
+    dend dendsegs.append_segments_from_section()
     //    dendsegs.display()
      
     print ""
@@ -47,11 +47,12 @@ func test_area() { local failflag, nrnarea
         print "-----------------------"
         print "Calculating segment ", i
         print "-----------------------"
+        seg = dendsegs.srl.object(i).x
         raarea = ra.apply_expr_to_segref(dendsegs.srl.object(i),"PI*l*d")
         ral = ra.apply_expr_to_segref(dendsegs.srl.object(i),"l")
         nrnarea = area(dendsegs.srl.object(i).x)        
-        dend print "x, L/nseg, l, area, area(): ", dendsegs.srl.object(i).x,  L/nseg, ral,  raarea,  nrnarea
-        if (ral != L/nseg) failflag = 1
+        dend print "x, ral, length,  ralarea, area(): ", dendsegs.srl.object(i).x,  ral, L/nseg * ((seg!=0)&&(seg!=1)),  raarea,  nrnarea
+        if (ral != L/nseg*((seg!=0)&&(seg!=1))) failflag = 1
         if (int(raarea) != int (nrnarea)) failflag = 1
     }        
     return failflag
@@ -78,7 +79,7 @@ func test_height () { local failflag, nrnarea
     failflag = 0
     dend nseg = $1
     dend dendsegs = new SegmentRefList()
-    dend dendsegs.append_internal_segments_from_section()    
+    dend dendsegs.append_segments_from_section()    
     //    dendsegs.display()p
      
     print ""
@@ -87,7 +88,7 @@ func test_height () { local failflag, nrnarea
     print "========================="
     totraheight = 0
     for i=0, dendsegs.srl.count()-1 {
-        raheight = ra.apply_expr_to_segref(dendsegs.srl.object(i),"h*l")
+        raheight = ra.apply_expr_to_segref(dendsegs.srl.object(i),"H*l")
         dend print "x, h: ", dendsegs.srl.object(i).x, raheight
         totraheight += raheight
     }
@@ -126,7 +127,7 @@ func test_height_shift () { local failflag, nrnarea,     totheightshift
     failflag = 0
     dend nseg = $1
     dend dendsegs = new SegmentRefList()
-    dend dendsegs.append_internal_segments_from_section()    
+    dend dendsegs.append_segments_from_section()    
     //    dendsegs.display()p
      
     print ""
@@ -135,7 +136,7 @@ func test_height_shift () { local failflag, nrnarea,     totheightshift
     print "========================="
     totraheight = 0
     for i=0, dendsegs.srl.count()-1 {
-        raheight = ra.apply_expr_to_segref(dendsegs.srl.object(i),"h*l")
+        raheight = ra.apply_expr_to_segref(dendsegs.srl.object(i),"H*l")
         dend print "x, h: ", dendsegs.srl.object(i).x, raheight
         totraheight += raheight
     }
