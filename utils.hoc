@@ -1,0 +1,7 @@
+strdef utils_tmpstr
+proc setwritepar () { 
+    sprint(utils_tmpstr, "%s = %g", $s1, $2)
+    execute(utils_tmpstr)
+    sprint(utils_tmpstr, "fprint(\"%s = %g ;\\n\", %s )", $s1, $2, $s1)
+    execute(utils_tmpstr)
+}

@@ -1,0 +1,33 @@
+begintemplate PlasSynStim
+public loc, get_loc, get_distance
+public ps, netstim, ncf, ncb
+objref ps, netstim, ncf, ncb
+
+proc init() {
+    ps = new PlasSyn(0.5)
+    netstim = new NetStim(0.5)
+    ncf = new NetCon(netstim, ps) // Forward connection
+    ncb = new NetCon(&v(0.5), ps, 0, 1, 0) // Backward connection
+    ncf.weight[1] = 1           // Type 1 is presynaptic
+    ncb.weight[1] = 0           // Type 0 is postsynaptic
+}
+
+proc loc() {
+    ps.loc($1)
+    ncb = new NetCon(&v(0.5), ps, 0, 1, 0)
+    ncb.weight[1] = 0
+}
+
+func get_loc() {
+    x =  ps.get_loc()
+    pop_section()                 // needed to keep the stack in order
+    return x
+}
+
+func get_distance() {
+    dist = distance(ps.get_loc()) // Seems to work, though not documented
+    pop_section()                 // needed to keep the stack in order
+    return dist
+}
+
+endtemplate PlasSynStim
