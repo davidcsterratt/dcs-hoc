@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sRPlot = $Revision: 1.6 $, ",pkgversions)
+sprint(pkgversions,"%sRPlot = $Revision: 1.7 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
 load_file("utils.hoc")
@@ -16,7 +16,7 @@ public set_width, set_height
 objref xvec, yvec
 objref xveclist, yveclist
 objref rfile
-strdef rfilename
+strdef rfilename, tmpdir
 objref li, lilist
 strdef xlab, ylab, rxlab, rylab
 strdef cmd
@@ -25,20 +25,23 @@ strdef texlab, rlab, tmp
 objref sf
 
 proc init() {
+    // Name of tempfile and directory
+    rfile = new File()
+    rfile.mktemp()
+    rfilename = rfile.getname()
+    tmpdir = rfile.dir()
+    
+    // Overide filename with argument
+    if (numarg() == 1) { rfilename = $s1 }
+    rfile = new FormatFile(rfilename,"R")
+    
+    // Initialise variables and objects
+    width=6
+    height=4
+    oc = new ObjectClass()
     xvec = new Vector()
     yvec = new Vector()
     li = new Vector()
-    if (numarg() == 1) {
-        rfilename = $s1 
-    } else {
-        rfile = new File()
-        rfile.mktemp()
-        rfilename = rfile.getname()
-    }
-    rfile = new FormatFile(rfilename,"R")
-    oc = new ObjectClass()
-    width=6
-    height=4
 }
 
 func getline() { local i 
@@ -136,7 +139,7 @@ proc end_plot() {
 }
 
 proc run() {
-    sprint(cmd,"R BATCH %s.R", rfilename)
+    sprint(cmd,"R BATCH %s.R %s/%s.Rout", rfilename,tmpdir,rfilename)
     system(cmd)
 }
 
