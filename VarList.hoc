@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sVarList = $Revision: 1.13 $, ",pkgversions)
+sprint(pkgversions,"%sVarList = $Revision: 1.14 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
 load_file("ObjectClass.hoc")
@@ -114,6 +114,45 @@ proc fprint() {
 }
 endtemplate VectorVar
 
+begintemplate MatrixVar
+
+public name, ptr, type, action
+public printf, fprint
+
+strdef name, cmd, action
+objref ptr, this
+objref oc
+
+proc init() {
+    sprint(name,"%s",$s1)
+    if (numarg() >= 2) {
+        sprint(action,"%s",$s2)
+    }
+    oc = new ObjectClass()
+}
+func matrix_exists() {
+    sprint(cmd,"%s.ptr = %s", this, name)
+    execute1(cmd)
+    if (oc.object_is(ptr,"NULLobject")) {
+        print "VarList: Warning: ", name, " is NULLobject"
+        return 0
+    }
+    return 1
+}
+
+proc printf() {
+    if (matrix_exists()) {
+        print name, " = ", ptr.printf()
+    }
+}
+proc fprint() {
+    if (matrix_exists()) {
+        $o1.printmat(name, ptr)
+    }
+}
+endtemplate MatrixVar
+
+
 //
 // VectorListVar
 // 
@@ -162,6 +201,7 @@ public appendDouble, appendSetDouble
 public appendString, appendSetString
 public appendVector
 public appendVectorList
+public appendMatrix
 public printVarNames
 public printf, printf_actions 
 public fprint, fprint_actions
@@ -233,6 +273,16 @@ proc appendVectorList() {
     if ( numarg() == 2 ) { l.append(new VectorListVar($s1,$s2)) }
     if ( numarg() == 1 ) { l.append(new VectorListVar($s1)) }
 }
+
+proc appendMatrix() {
+    remove($s1)
+    if ( numarg() >= 2 ) {
+        l.append(new MatrixVar($s1,$s2))
+    } else {
+        l.append(new MatrixVar($s1))
+    }        
+}
+
 
 proc printVarNames() { local i
     for i=0, l.count()-1 {
