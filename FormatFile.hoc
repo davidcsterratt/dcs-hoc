@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sFormatFile = $Revision: 1.10 $, ",pkgversions)
+sprint(pkgversions,"%sFormatFile = $Revision: 1.11 $, ",pkgversions)
 
 /*
 
@@ -354,14 +354,11 @@ proc printvec_generic () { local i, chunk_size,  total_size, pos, name, blockend
     }
 }
 
-proc printvec_hoc() { local i
+proc printvec_hoc() { 
     f.printf("scan_vec_()\n")
     f.printf("%s\n", $s1)
     f.printf("%g\n", $o2.size())
-    for i=0, $o2.size()-1 {
-        f.printf("%.10g ",$o2.x(i))
-    }
-    f.printf("\n")
+    $o2.printf(f,"%.10g ")
 }
 
 //
@@ -407,17 +404,10 @@ proc printmat () { local i, j, nrows, ncols
     }
 }
 
-proc printmat_hoc() { local i, j, nrow, ncol
-    nrow = $o2.nrow()
-    ncol = $o2.ncol()
-    f.printf("scan_mat_()\n%s\n\%g %g\n", $s1, nrow, ncol)
-    if ((nrow >= 1)  && (ncol >=1)) {
-        for i = 0, nrow-1 {
-            for j=0, ncol-1 {
-                f.printf("%.10g ", $o2.x[i][j])
-            }
-        }
-    }
+proc printmat_hoc() { 
+    f.printf("scan_mat_()\n")
+    f.printf("%s\n", $s1)
+    $o2.fprint(f,"%.10g ")
 }
 
 //
