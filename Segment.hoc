@@ -1,4 +1,4 @@
-fprint("Segment_ver = '$Revision: 1.4 $';\n")
+fprint("Segment_ver = '$Revision: 1.5 $';\n")
 /*
 
 SegmentRef
@@ -89,6 +89,7 @@ objref bestseg
 
 proc init() { 
     srl = new List()
+    verbose = 0
 }
 
 proc append_segments_from_section() { local x 
@@ -187,8 +188,10 @@ proc parents() { local i, j, x, bsi
                     }
                 }
             }
-            srl.object(bsi).secref.sec print "parent:", bsi , " ", secname(), srl.object(bsi).x
-            srl.object(i).secref.sec print "child:", i , " ", secname(), srl.object(i).x
+            if (verbose) {
+                srl.object(bsi).secref.sec print "parent:", bsi , " ", secname(), srl.object(bsi).x
+                srl.object(i).secref.sec print "child:", i , " ", secname(), srl.object(i).x
+            }
             $o1.x(i) = bsi
         }
     }
@@ -196,35 +199,3 @@ proc parents() { local i, j, x, bsi
 
 endtemplate SegmentRefList
 
-//                            if ( bestseg.is_cas() {
-//                                // Find the highest x
-//                            } 
-//                            else {
-//                                bestseg = srl.object(j)
-                            
-
-                
-//                    // If the best segment is already in the same section as i,
-//                    // does it 
-//                    if ( srl.object(bsi).secref.is_cas() && (srl.object(j).x > bestseg.x) && (srl.object(j).x < x) ) {
-//                        bestseg = srl.object(j)
-//                    } 
-//                } 
-                    
-                        
-//                    // If so, is the segment before i's
-//                    if ( ( srl.object(i).x - srl.object(j).x) * srl.object(j).secref.nseg * (1 + (srl.object(j) == 0)) == 1 ) {
-//                        $o1.x(i) = j 
-//                    } 
-//                    else {
-//                        continue 
-//                    }
-//                } 
-//                else { 
-//                    // Is segement j in the parent of i?
-//                    xcas = srl.object(i).x
-//                    if ( ( srl.object(i).x - srl.object(j).x) * srl.object(j).secref.nseg * (1 + (srl.object(j) == 0)) == 1 ) {
-//                        $o1.x(i) = j 
-//                    } 
-//                    else {
-//                        continue 
