@@ -1,8 +1,9 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sRPlot = $Revision: 1.10 $, ",pkgversions)
+sprint(pkgversions,"%sRPlot = $Revision: 1.11 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
-load_file("utils.hoc")
+load_file("ObjectClass.hoc")
+load_file("FileUtils.hoc")
 
 begintemplate RPlot
 
@@ -22,15 +23,15 @@ strdef xlab, ylab, rxlab, rylab
 strdef cmd
 objref oc
 strdef texlab, rlab, tmp
-objref sf
+objref sf, fu
 
 proc init() {
-    // Name of tempfile and directory
-    rfile = new File()
-    rfile.mktemp()
-    rfilename = rfile.getname()
-    tmpdir = rfile.dir()
+    sf = new StringFunctions()
+    fu = new FileUtils()
+    fu.tempdirname(tmpdir)
     
+    if (numarg() == 0) { create_rfile() }
+    if (numarg() == 1) { create_rfile($s1) }
     
     // Initialise variables and objects
     width=6
@@ -43,6 +44,7 @@ proc init() {
 
 proc create_rfile() {
     // Overide filename with argument
+    fu.tempfilename(rfilename)
     if (numarg() == 1) { rfilename = $s1 }
     rfile = new FormatFile(rfilename,"R")
 }
@@ -142,7 +144,11 @@ proc end_plot() {
 }
 
 proc run() {
-    sprint(cmd,"R BATCH %s.R %s/%s.Rout", rfilename,tmpdir,rfilename)
+    fu.basename(rfilename,tmp)
+    print rfilename
+    print tmpdir
+    print tmp
+    sprint(cmd,"R BATCH %s.R %s/%s.Rout", rfilename,tmpdir,tmp)
     system(cmd)
 }
 
@@ -164,7 +170,6 @@ proc clear() {
 proc textoRtext() {
     texlab = $s1
     sprint(texlab,"%s ",texlab) // Hack to fix bug with tex symbol at end of string
-    sf = new StringFunctions()
     rlab = "expression(paste("
     while (( ind = sf.substr(texlab,"\\")) != -1) {
         // print texlab, "]"
