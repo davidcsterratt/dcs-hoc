@@ -1,12 +1,12 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sTreePlot = $Revision: 1.11 $, ",pkgversions)
+sprint(pkgversions,"%sTreePlot = $Revision: 1.12 $, ",pkgversions)
 
 load_file("RPlot.hoc")
 
 begintemplate TreePlot
 
 public plot, lines, marks
-public view, size, family
+public view, size, family, erase_all
 public getline, line_info, view_info
 public getmarks
 public graph
@@ -39,25 +39,25 @@ proc init() { local i
     tmpyvec = new Vector(2)
     xmarklist = new List()
     ymarklist = new List()
-    colour=1
-    lines_flag=1                        // Show lines
-    marks_flag=0                        // Don't show marks
-    family_flag=0                       // Whether to keep lines
+    colour = 1
+    lines_flag = 1                        // Show lines
+    marks_flag = 0                        // Don't show marks
+    family_flag = 0                       // Whether to keep lines
     for i=0,3 { auto_flag[i] = 1 }
     xlab = ""
     ylab = ""
     rp = new RPlot()
 }
 
-proc plot() { local i
+proc plot() { local i, s
     xvec = $o1
     yvec = $o2
     parentsvec = $o3
     
     // Clear graph if required
     if (!family_flag) { 
-        graph.erase_all() 
-        colour=1
+        erase_all()
+        colour = 1
     }
     
     // So that crosshair_action works, do invisible line
@@ -76,9 +76,15 @@ proc plot() { local i
         xmarklist.append(xvec)
         ymarklist.append(yvec)
     }
-    colour +=1
+    colour += 1
     if (colour == 10) colour=1
 }
+
+proc erase_all() {
+    graph.erase_all() 
+    s = xmarklist.remove_all()
+    s = ymarklist.remove_all()
+}    
 
 // turn lines on or off
 proc lines() { lines_flag = $1 }
