@@ -1,11 +1,11 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sTreePlot = $Revision: 1.13 $, ",pkgversions)
+sprint(pkgversions,"%sTreePlot = $Revision: 1.14 $, ",pkgversions)
 
 load_file("RPlot.hoc")
 
 begintemplate TreePlot
 
-public plot, lines, marks
+public plot, lines, marks, errorbars
 public view, size, family, erase_all
 public getline, line_info, view_info
 public getmarks
@@ -40,8 +40,9 @@ proc init() { local i
     xmarklist = new List()
     ymarklist = new List()
     colour = 1
-    lines_flag = 1                        // Show lines
-    marks_flag = 0                        // Don't show marks
+    lines(1)                              // Show lines
+    marks(0)                              // Don't show marks
+    errorbars(1)                          // Show errorbars
     family_flag = 0                       // Whether to keep lines
     for i=0,3 { auto_flag[i] = 1 }
     xlab = ""
@@ -77,7 +78,7 @@ proc plot() { local i, s
         xmarklist.append(xvec)
         ymarklist.append(yvec)
     }
-    if (numarg() >= 4) {
+    if ((numarg() >= 4) && (errorbars_flag == 1)) {
         for i=0, errorvec.size()-1 {
             tmpxvec.x(0) = xvec.x(i)
             tmpxvec.x(1) = xvec.x(i)
@@ -101,6 +102,9 @@ proc lines() { lines_flag = $1 }
 
 // turn marks on or off
 proc marks() { marks_flag = $1 }
+
+// turn errorbars on or off
+proc errorbars() { errorbars_flag = $1 } 
 
 // mleft, mbottom, mwidth, mheight, wleft, wtop, wwidth, wheight
 proc view() { graph.view($1,$2,$3,$4,$5,$6,$7,$8) }
