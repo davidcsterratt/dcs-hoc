@@ -1,7 +1,8 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sVarList = $Revision: 1.10 $, ",pkgversions)
+sprint(pkgversions,"%sVarList = $Revision: 1.11 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
+load_file("utils.hoc")
 
 //
 // DoubleVar
@@ -81,22 +82,35 @@ public printf, fprint
 
 strdef name, cmd, action
 objref ptr, this
+objref oc
 
 // new Var("name")
 proc init() {
     sprint(name,"%s",$s1)
-    sprint(cmd,"%s.ptr = %s", this, name)
-    execute1(cmd)
     if (numarg() >= 2) {
         sprint(action,"%s",$s2)
     }
+    oc = new ObjectClass()
+}
+func vector_exists() {
+    sprint(cmd,"%s.ptr = %s", this, name)
+    execute1(cmd)
+    if (oc.object_is(ptr,"NULLobject")) {
+        print "VarList: Warning: ", name, " is NULLobject"
+        return 0
+    }
+    return 1
 }
 
 proc printf() {
-    print name, " = ", ptr.printf()
+    if (vector_exists()) {
+        print name, " = ", ptr.printf()
+    }
 }
 proc fprint() {
-    $o1.printvec(name, ptr)
+    if (vector_exists()) {
+        $o1.printvec(name, ptr)
+    }
 }
 endtemplate VectorVar
 
