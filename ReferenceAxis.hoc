@@ -1,4 +1,4 @@
-fprint("ReferenceAxis_ver = '$Revision: 1.1 $';\n")
+fprint("ReferenceAxis_ver = '$Revision: 1.2 $';\n")
 load_file("Segment.hoc")
 
 /*
@@ -43,7 +43,7 @@ begintemplate ReferenceAxis
 public base, apex, axis
 public pt3dbase, pt3dapex
 public setup_with_secrefs
-public seg_meanh_func
+public apply_expr_to_segref
 public verb
 objref base, apex, pt3dbase, pt3dapex
 objref axis                             // Normaliased vector in direction of axis
