@@ -1,3 +1,4 @@
+fprint("Segment_ver = '$Revision: 1.2 $';\n")
 /*
 
 SegmentRef
@@ -58,7 +59,7 @@ ith SegmentRef in the list.  Useful for certain kinds of plot.
 
 begintemplate SegmentRefList
 public srl, parents, append_segments, append_segments_without_zeros
-public append_nonend_segments_from_section
+public append_internal_segments_from_section
 public display
 objref srl, bestseg
 
