@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) { execute("strdef pkgversions") } 
-sprint(pkgversions,"%sutils = $Revision: 1.13 $, ",pkgversions)
+sprint(pkgversions,"%sutils = $Revision: 1.14 $, ",pkgversions)
 
 //
 // error(String error) 
@@ -55,4 +55,58 @@ proc stdev() { local i
         $o2.x(i) = $o1.getcol(i).stdev()
     }
 }
+
+//
+// integral(Vector y, Vector x)
+//
+// Numerical integration using trapezoid rule
+//
+
+begintemplate Integrator
+public integrate
+
+objref x0, x1, ybar, dx
+
+proc init() {
+    x0 = new Vector()
+    x1 = new Vector()
+    dx = new Vector()
+    ybar = new Vector()
+}
+
+func integrate () {
+    x0.indgen(0, $o2.size()-2,1)
+    x1.indgen(1, $o2.size()-1,1)
+    ybar = $o1.ind(x0) 
+    ybar.add($o1.ind(x1))
+    dx.deriv($o2,1,1) 
+    return ybar.dot(dx)/2
+}
+
+endtemplate Integrator
+
+// 
+// object_is(objref obj, String classname)
+// 
+begintemplate ObjectClass
+public object_is
+public objrefid, objind, objid
+strdef tmpstr
+objref this
+proc init() {
+    objrefid = 0
+    objind = 0
+    objid = 0
+}
+func object_is() {
+    sprint(tmpstr,"%s.objrefid = object_id(%s)",this,$s1)
+    execute(tmpstr)
+    sprint(tmpstr,"%s.objind = object_id(%s,1)",this,$s1)
+    execute(tmpstr)
+    sprint(tmpstr, "%s.objid = object_id(%s[%g])",this,$s2,objind)
+    execute(tmpstr)
+    return (objid == objrefid)
+}
+endtemplate ObjectClass
+
 
