@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sTreePlot = $Revision: 1.12 $, ",pkgversions)
+sprint(pkgversions,"%sTreePlot = $Revision: 1.13 $, ",pkgversions)
 
 load_file("RPlot.hoc")
 
@@ -16,7 +16,7 @@ public set_xlab, get_xlab
 public set_ylab, get_ylab
 public view_equal_plot, auto_limits_on, set_limits, get_limit
 
-objref graph, xvec, yvec, diamvec, parentsvec
+objref graph, xvec, yvec, diamvec, parentsvec, errorvec
 objref tmpxvec, tmpyvec
 objref xmarklist, ymarklist
 strdef xlab, ylab
@@ -53,6 +53,7 @@ proc plot() { local i, s
     xvec = $o1
     yvec = $o2
     parentsvec = $o3
+    if (numarg() >= 4) { errorvec = $o4 }
     
     // Clear graph if required
     if (!family_flag) { 
@@ -75,6 +76,15 @@ proc plot() { local i, s
         yvec.mark(graph,xvec,"o",6,colour)
         xmarklist.append(xvec)
         ymarklist.append(yvec)
+    }
+    if (numarg() >= 4) {
+        for i=0, errorvec.size()-1 {
+            tmpxvec.x(0) = xvec.x(i)
+            tmpxvec.x(1) = xvec.x(i)
+            tmpyvec.x(0) = yvec.x(i)-errorvec.x(i)
+            tmpyvec.x(1) = yvec.x(i)+errorvec.x(i)
+            tmpyvec.line(graph,tmpxvec,colour,1)
+        }
     }
     colour += 1
     if (colour == 10) colour=1
