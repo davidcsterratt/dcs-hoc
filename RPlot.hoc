@@ -1,12 +1,12 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sRPlot = $Revision: 1.9 $, ",pkgversions)
+sprint(pkgversions,"%sRPlot = $Revision: 1.10 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
 load_file("utils.hoc")
 
 begintemplate RPlot
 
-public start_plot, add_graph, end_plot
+public create_rfile, start_plot, add_graph, end_plot
 public run
 public plot
 public clear
@@ -31,9 +31,6 @@ proc init() {
     rfilename = rfile.getname()
     tmpdir = rfile.dir()
     
-    // Overide filename with argument
-    if (numarg() == 1) { rfilename = $s1 }
-    rfile = new FormatFile(rfilename,"R")
     
     // Initialise variables and objects
     width=6
@@ -42,6 +39,12 @@ proc init() {
     xvec = new Vector()
     yvec = new Vector()
     li = new Vector()
+}
+
+proc create_rfile() {
+    // Overide filename with argument
+    if (numarg() == 1) { rfilename = $s1 }
+    rfile = new FormatFile(rfilename,"R")
 }
 
 func getline() { local i 
