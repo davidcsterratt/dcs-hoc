@@ -1,4 +1,6 @@
-fprint("Segment_ver = '$Revision: 1.5 $';\n")
+if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
+sprint(pkgversions,"%sSegment = $Revision: 1.6 $, ",pkgversions)
+
 /*
 
 SegmentRef
@@ -149,6 +151,13 @@ proc parents() { local i, j, x, bsi
             bsi = i                     // Best segment index
             // Look through all members of list for a parent
             for j = 0, srl.count()-1 {
+                
+                if (verbose) {
+                    if (( i <=3) && (j <= 3) ) {
+                        print i , j, bsi
+                    }
+                }
+                
                 // Igore if same as i
                 if ( i == j ) {
                     continue
@@ -157,8 +166,10 @@ proc parents() { local i, j, x, bsi
                 if ( srl.object(j).secref.is_cas() ) {
                     // If it segment j has lower x it might be parent
                     if ( srl.object(j).x < srl.object(i).x ) {
-                        // If the best segment isn't in this section it should be
-                        if ( !srl.object(bsi).secref.is_cas() ) {
+                        // If the best segment isn't in this section it 
+                        // should be or if it's not been set yet we should
+                        // set it
+                        if ( (!srl.object(bsi).secref.is_cas()) || (bsi == i) ) {
                             bsi = j 
                         } else {
                             if ( srl.object(bsi).x < srl.object(j).x ) {
