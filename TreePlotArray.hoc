@@ -1,0 +1,38 @@
+if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
+sprint(pkgversions,"%sTreePlot = $Revision: 1.1 $, ",pkgversions)
+
+load_file("TreePlot.hoc")
+
+begintemplate TreePlotArray
+public glist, cellref
+
+objref vb
+objref hblist
+objref glist
+
+// TreePlotArray(double rows, double cols)
+proc init() { local i, j
+    rows = $1
+    cols = $2
+    vb = new VBox()
+    hblist = new List()
+    glist = new List()
+    vb.intercept(1)
+    for i=0,rows-1 {
+        hblist.append(new HBox())
+        hblist.object(i).intercept(1)
+        for j = 0,cols-1 {
+            glist.append(new TreePlot())
+        }
+        hblist.object(i).intercept(0)
+        hblist.object(i).map
+    }
+    vb.intercept(0)
+    vb.map
+}
+
+proc cellref() {
+    $o1 = glist.object($2*cols + $3)
+}
+
+endtemplate TreePlotArray

@@ -1,0 +1,10 @@
+load_file("TreePlotArray.hoc")
+
+objref d
+d = new Deck()
+d.intercept(1)
+objref tpa1, tpa2 
+tpa1 = new TreePlotArray(2,3)
+tpa2 = new TreePlotArray(2,2)
+d.intercept(0)
+d.map
