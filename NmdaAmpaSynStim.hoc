@@ -1,0 +1,47 @@
+if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
+sprint(pkgversions,"%sNmdaAmpaSynStim = $Revision: 1.1 $, ",pkgversions)
+
+
+/*
+
+NmdaAmpaSynStim -- NMDA and AMPA synapse with netstim stimulus
+
+nass = new NmdaAmpaSynStim() - creates NmdaAmpaSynStim nass
+nass.loc(x)                  - locates at x on the current section
+nass.get_loc()               - returns relative location along the section
+nass.get_distance()          - returns distance from origin specified by distance()
+
+*/
+
+begintemplate NmdaAmpaSynStim
+
+public loc, get_loc, get_distance
+public ampasyn, nmdasyn, netcon, nmdanetcon, netstim 
+objref ampasyn, nmdasyn, netcon, nmdanetcon, netstim 
+
+proc init() {
+    ampasyn = new AmpaSyn($1)
+    nmdasyn = new NmdaSyn($1)
+    netstim = new NetStim($1)
+    netcon = new NetCon(netstim,ampasyn)
+    nmdanetcon = new NetCon(netstim,nmdasyn)
+}
+
+proc loc() {
+    ampasyn.loc($1)
+    nmdasyn.loc($1)
+}
+
+func get_loc() {
+    x =  ampasyn.get_loc()
+    pop_section()                 // needed to keep the stack in order
+    return x
+}
+
+func get_distance() {
+    dist = distance(ampasyn.get_loc()) // Seems to work, though not documented
+    pop_section()                 // needed to keep the stack in order
+    return dist
+}
+
+endtemplate NmdaAmpaSynStim
