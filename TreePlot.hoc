@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sTreePlot = $Revision: 1.10 $, ",pkgversions)
+sprint(pkgversions,"%sTreePlot = $Revision: 1.11 $, ",pkgversions)
 
 load_file("RPlot.hoc")
 
@@ -11,7 +11,7 @@ public getline, line_info, view_info
 public getmarks
 public graph
 
-public rprintfile
+public rprintfile, rp
 public set_xlab, get_xlab
 public set_ylab, get_ylab
 public view_equal_plot, auto_limits_on, set_limits, get_limit
@@ -46,6 +46,7 @@ proc init() { local i
     for i=0,3 { auto_flag[i] = 1 }
     xlab = ""
     ylab = ""
+    rp = new RPlot()
 }
 
 proc plot() { local i
@@ -158,8 +159,10 @@ proc get_ylab() { $s1 = ylab }
 
 // rprintfile(String epsfilename, Double SaveFile)
 proc rprintfile() { local i, j
-    if (numarg() == 1) { rp = new RPlot() }
-    if ((numarg() == 2) && ($2 != 0)) { rp = new RPlot($s1) }
+    if (numarg() == 1) { rp.create_rfile() }
+    if (numarg() == 2) {
+        if ($2 != 0) { rp.create_rfile($s1) }
+    }
     rp.start_plot($s1)
     rp.add_graph(this)
     rp.end_plot()
