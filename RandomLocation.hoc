@@ -1,0 +1,50 @@
+/*
+RandomLocation
+
+rl = new RandomLocation(SectionList)
+rl.loc(PointProcess)
+
+relocates the PointProcess to a random location with respect to
+uniform distribution based on position.
+SectionList defines the set of sections to sample.
+PointProcess must have a loc() member function.
+There must be a default section declared to measure distance from.
+*/
+
+begintemplate RandomLocation
+
+public loc
+public total_length
+objectvar seclist, ran 	
+
+proc init() {
+    seclist = $o1
+    ran = new Random($2)
+    total_length = 0
+    forsec seclist { total_length = total_length + L }
+}
+
+// randomize location of synapse
+func loc() {local l, done, rpos, secx, dx, gl
+    rpos = ran.uniform(0, total_length)
+    done = 0
+    l = 0
+    //  distance()  // assumes soma is currently accessed         
+    // sets the currently-accessed section as the origin
+    forsec seclist {
+        l = l + L               // L is length of section
+        if (l > rpos) {
+            //      print l, " ", rpos, " ", L
+            secx = (rpos - l + L)/L
+            //      print secx
+			      $o1.loc(secx)
+            dx = distance(secx) 
+            print secname(), " ", secx, " ", dx
+            rpos = 1e20   // a break would screw up the stack?
+        }
+    }
+    return secx
+}
+
+endtemplate RandomLocation
+
