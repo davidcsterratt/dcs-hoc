@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) { execute("strdef pkgversions") } 
-sprint(pkgversions,"%sutils = $Revision: 1.15 $, ",pkgversions)
+sprint(pkgversions,"%sutils = $Revision: 1.16 $, ",pkgversions)
 
 //
 // error(String error) 
@@ -90,13 +90,10 @@ endtemplate Integrator
 // 
 begintemplate ObjectClass
 public object_is, object_name
-public objrefid, objind, objid
 strdef tmpstr, objclass
-objref this, sf
+
+objref sf
 proc init() {
-    objrefid = 0
-    objind = 0
-    objid = 0
     sf = new StringFunctions()
 }
 
@@ -108,7 +105,6 @@ proc object_name() {
 
 func object_is() { local ind
     sprint(tmpstr,"%s",$o1)
-    print tmpstr
     sf.head(tmpstr,"\[[0-9]",objclass)
     return !strcmp(objclass,$s2)
 }
