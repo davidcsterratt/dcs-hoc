@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sSimpleSpine = $Revision: 1.1 $, ",pkgversions)
+sprint(pkgversions,"%sSimpleSpine = $Revision: 1.2 $, ",pkgversions)
 
 begintemplate SimpleSpine
 
@@ -17,8 +17,8 @@ proc init() {
     neckdiam = 0.2
     create head
     head insert pas
-    // Second arg prevents location
-    if (numarg() == 1) { this.loc($1) }
+    // Negative arg prevents location
+    if ($1 >= 0) { this.loc($1) }
     // Get properties of spine from parent (which we're accessing)
     pRa = Ra
     if (ismembrane("g_pas")) {
