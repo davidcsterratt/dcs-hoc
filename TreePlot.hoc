@@ -1,0 +1,34 @@
+if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
+sprint(pkgversions,"%sTreePlot = $Revision: 1.1 $, ",pkgversions)
+
+begintemplate TreePlot
+
+objref graph, xvec, yvec, diamvec, parentsvec
+objref tmpxvec, tmpyvec
+public plot
+public graph, xvec, yvec, diamvec, parentsvec
+
+
+proc init() {
+    graph = new Graph()
+    tmpxvec = new Vector(2)
+    tmpyvec = new Vector(2)
+    colour=1
+}
+
+proc plot() { local i
+    xvec = $o1
+    yvec = $o2
+    parentsvec = $o3
+    for i=0, xvec.size()-1 { 
+        tmpxvec.x(0) = xvec.x(i)
+        tmpxvec.x(1) = xvec.x(parentsvec.x(i))
+        tmpyvec.x(0) = yvec.x(i)
+        tmpyvec.x(1) = yvec.x(parentsvec.x(i))
+        tmpyvec.line(graph,tmpxvec,colour,1)
+    }
+    colour +=1
+    if (colour == 10) colour=1
+}
+
+endtemplate TreePlot
