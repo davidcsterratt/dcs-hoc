@@ -23,8 +23,8 @@ for i=0,1 {
         glist[i*3+j].lines(i)
         glist[i*3+j].marks(j)
         glist[i*3+j].plot(vec,vec,parents)
-        glist[i*3+j].set_xlab("time /ms")
-        glist[i*3+j].set_ylab("value /mpound")
+        glist[i*3+j].set_xlab("time /\\mu s")
+        glist[i*3+j].set_ylab("value /\\Omega pound")
     }
 }
 
