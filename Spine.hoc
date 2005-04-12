@@ -1,0 +1,54 @@
+if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
+sprint(pkgversions,"%sSpine = $Revision: 1.1 $, ",pkgversions)
+
+begintemplate Spine
+
+public head
+public headL, headdiam
+public neckL, neckdiam
+public loc, addSyn
+objref this
+
+create head
+create neck
+proc init() {
+    headL = 0.2
+    headdiam = 1
+    neckL = 1 
+    neckdiam = 0.2
+    create head
+    create neck
+    head insert pas
+    neck insert pas
+    // Negative arg prevents location
+    if ($1 >= 0) { this.loc($1) }
+    // Get properties of spine from parent (which we're accessing)
+    pRa = Ra
+    if (ismembrane("g_pas")) {
+        pg_pas = g_pas
+    } else {
+        pg_pas = 10E-5
+    }
+    head {
+        Ra = pRa
+        g_pas = pg_pas 
+        diam = headdiam
+        L = headL
+    }
+    neck {
+        Ra = pRa
+        g_pas = pg_pas 
+        diam = neakdiam
+        L = neckL
+    }
+}
+
+proc loc() {
+    connect neck(0), $1    
+}
+
+proc addSyn() {
+    head $o1.loc(1)
+}
+
+endtemplate Spine
