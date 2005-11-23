@@ -1,8 +1,8 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sFileUtils = $Revision: 1.2 $, ",pkgversions)
+sprint(pkgversions,"%sFileUtils = $Revision: 1.3 $, ",pkgversions)
 
 begintemplate FileUtils
-public basename, dirname
+public basename, dirname, homedirname
 public tempfilename, tempdirname
 
 objref sf, f
@@ -33,5 +33,10 @@ proc tempdirname () {
     tempfilename(tmpstr)
     dirname(tmpstr,$s1)
 }
-    
+
+proc homedirname () {
+    system("echo -n $HOME",tmpstr)
+    sf.head(tmpstr,"\n",$s1)
+}
+
 endtemplate FileUtils
