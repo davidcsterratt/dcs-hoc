@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sReferenceAxis = $Revision: 1.4 $, ",pkgversions)
+sprint(pkgversions,"%sReferenceAxis = $Revision: 1.5 $, ",pkgversions)
 load_file("Segment.hoc")
 
 /*
@@ -43,9 +43,9 @@ begintemplate ReferenceAxis
 
 // Public variables
 
-public base, apex                       // SectionRefs of base and apex
+public base, apex                      // SectionRefs of base and apex
 objref base, apex
-public axis                             // Vector joining base and apex
+public axis, normaxis                  // Vector joining base and apex
 objref axis 
 public verb                             // Verbose output
 public adjustment
