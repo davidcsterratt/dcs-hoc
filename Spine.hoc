@@ -1,11 +1,9 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sSpine = $Revision: 1.1 $, ",pkgversions)
+sprint(pkgversions,"%sSpine = $Revision: 1.2 $, ",pkgversions)
 
 begintemplate Spine
 
-public head
-public headL, headdiam
-public neckL, neckdiam
+public head, neck
 public loc, addSyn
 objref this
 
@@ -18,6 +16,7 @@ proc init() {
     neckdiam = 0.2
     create head
     create neck
+    connect  head(0), neck(1)
     head insert pas
     neck insert pas
     // Negative arg prevents location
@@ -38,7 +37,7 @@ proc init() {
     neck {
         Ra = pRa
         g_pas = pg_pas 
-        diam = neakdiam
+        diam = neckdiam
         L = neckL
     }
 }
