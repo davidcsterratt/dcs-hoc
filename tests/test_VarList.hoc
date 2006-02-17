@@ -17,6 +17,8 @@ objref p2
 p2 = new VectorVar("vec")
 p2.printf()
 
+objref mat
+mat = new Matrix(10,5)
 
 objref null
 
@@ -30,6 +32,7 @@ pl.appendSetDouble("c", 7.3846,"print c")
 pl.appendSetString("y", "hello","print y")
 pl.appendVector("vec")
 pl.appendVector("null")
+pl.appendMatrix("mat")
 pl.appendVector("vec")                  // Duplicate; should replace previous
 pl.printf()
 
