@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sVarList = $Revision: 1.15 $, ",pkgversions)
+sprint(pkgversions,"%sVarList = $Revision: 1.16 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
 load_file("ObjectClass.hoc")
@@ -208,7 +208,7 @@ public printf, printf_actions
 public fprint, fprint_actions
 public save, load
 public execute_actions
-public xstatebutton, xvalue
+public xstatebutton, xvalue, xradiobuttons
 
 objref l, f, this, ldfile
 strdef tmpstr, path
@@ -373,7 +373,7 @@ proc remove() { local ind
 proc xstatebutton() { local ind
     ind = find($s2)
     if ( ind==-1 ) {
-        print this, "x statebutton(): ", $s2, " not a member of VarList"
+        print this, "xstatebutton(): ", $s2, " not a member of VarList"
         stop
     }
     sprint(tmpstr,"xstatebutton(\"%s\",&%s,\"%s\")",$s1,$s2,l.object(ind).action)
@@ -388,6 +388,20 @@ proc xvalue() { local ind
     }
     sprint(tmpstr,"xvalue(\"%s\",\"%s\",1,\"%s\")",$s1,$s2,l.object(ind).action)
     execute(tmpstr)
+}
+
+proc xradiobuttons() { local ind, i
+    ind = find($s2)
+    if ( ind==-1 ) {
+        print this, " xvalue(): ", $s2, " not a member of VarList"
+        stop
+    }
+    sprint(tmpstr,"xlabel(\"%s\")",$s1)
+    execute(tmpstr)
+    for i=3,numarg() {
+        sprint(tmpstr,"xradiobutton(\"%s\",\"%s=%d\")",$si,$s2,i-2)
+        execute(tmpstr)
+    }
 }
 
 endtemplate VarList
