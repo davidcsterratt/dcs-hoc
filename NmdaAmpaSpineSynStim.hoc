@@ -1,22 +1,21 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sNmdaAmpaSpineSynStim = $Revision: 1.4 $, ",pkgversions)
+sprint(pkgversions,"%sNmdaAmpaSpineSynStim = $Revision: 1.5 $, ",pkgversions)
 
 load_file("Spine.hoc")
 
 /*
 
-Exp2SynStim - exponential synapse with netstim stimulus
+NmdaAmpaSpineSynStim - NMDA-AMPA synapse on spine with netstim stimulus
 
-ess = new Exp2SynStim()  - creates ExpSynStim ess
-ess.loc(x)              - locates at x on the current section
-ess.get_loc()           - returns relative location along the section
-ess.get_distance()      - returns distance from origin specified by distance()
+s = new NmdaAmpaSpineSynStim()  - creates NmdaAmpaSpineSynStim s
+s.loc(x)              - locates at x on the current section
+s.get_distance()      - returns distance from origin specified by distance()
 
 */
 
 begintemplate NmdaAmpaSpineSynStim
 
-public loc,  get_distance // get_loc,
+public loc,  get_distance, event 
 public ampasyn, nmdasyn, netcon, nmdanetcon, netstim, spine
 objref ampasyn, nmdasyn, netcon, nmdanetcon, netstim, spine 
 
@@ -26,20 +25,19 @@ proc init() {
         ampasyn = new AmpaSyn(0.5)
         nmdasyn = new NmdaSyn(0.5)
         netstim = new NetStim(0.5)
-        netcon  = new NetCon(netstim,ampasyn)
+        netcon     = new NetCon(netstim,ampasyn)
         nmdanetcon = new NetCon(netstim,nmdasyn)
     }
+}
+
+proc event() {
+    netcon.event($1)
+    nmdanetcon.event($1)
 }
 
 proc loc() {
     spine.loc($1)
 }
-
-// func get_loc() {
-//     x =  expsyn.get_loc()
-//     pop_section()                 // needed to keep the stack in order
-//     return x
-// }
 
 func get_distance() {
     dist = distance(ampasyn.get_loc()) // Seems to work, though not documented
