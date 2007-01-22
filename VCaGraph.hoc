@@ -1,12 +1,12 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sVCaGraph = $Revision: 1.1 $, ",pkgversions)
+sprint(pkgversions,"%sVCaGraph = $Revision: 1.2 $, ",pkgversions)
 
 load_file("RPlot.hoc")
 load_file("FormatFile.hoc")
 load_file("GraphUtils.hoc")
 
 begintemplate VCaGraph
-public addvar, glist, rprintfile, save
+public addvar, glist, rprintfile, save, syninds
 
 strdef cmd
 objref vb
@@ -16,6 +16,7 @@ objref this
 objref file, rp
 objref gu
 objref xvl, yvl
+objref syninds, areas
 
 // VCaGraph(double rows, double cols)
 proc init() { local i, j
@@ -24,31 +25,48 @@ proc init() { local i, j
     hblist = new List()
     glist = new List()
     vb.intercept(1)
-    //     hblist.append(new HBox())
-    //     hblist.object(i).intercept(1)
     glist.append(new Graph(0))
     glist.object(0).view(0, -80, 100, 40, 930, 304, 300.48, 200.32)
-    //     hblist.object(i).intercept(0)
-    //     hblist.object(i).map
     glist.append(new Graph(0))
     glist.object(1).view(0, 0, 100, 0.01, 930, 304, 300.48, 200.32)
+    glist.append(new Graph(0))
+    glist.object(2).view(0, 0, 100, 1, 930, 304, 300.48, 200.32)
+    glist.append(new Graph(0))
+    glist.object(3).view(0, 0, 100, 0.1 , 930, 304, 300.48, 200.32)
     vb.intercept(0)
     vb.map
     sprint(cmd,"graphList[0].append(%s.glist.object(0))", this)
     execute1(cmd)
     sprint(cmd,"graphList[2].append(%s.glist.object(1))", this)
     execute1(cmd)
+    sprint(cmd,"graphList[2].append(%s.glist.object(2))", this)
+    execute1(cmd)
+    sprint(cmd,"graphList[2].append(%s.glist.object(3))", this)
+    execute1(cmd)
     rp = new RPlot()
     gu = new GraphUtils()
+    syninds = new Vector()
+    areas = new Vector()
 }
 
 // This takes an NmdaAmpaSpineSynStim object
 proc addvar() {
-    sprint(cmd,"%s.glist.object(0).addvar(\"%s.spine.head.v( 0.5 )\",%d,%d)", this, $o1, $2, $3)
+    sprint(cmd,"%s.glist.object(0).addvar(\"%s.spine.head.v( 0.5 )\",%d,%d)", this, $o1.object($2), $3, $4)
     execute1(cmd)
-    sprint(cmd,"%s.glist.object(1).addvar(\"%s.spine.head.cai( 0.5 )\",%d,%d)", this, $o1, $2, $3)
+    sprint(cmd,"%s.glist.object(1).addvar(\"%s.spine.head.cai( 0.5 )\",%d,%d)", this, $o1.object($2), $3, $4)
     execute1(cmd)
+    sprint(cmd,"%s.glist.object(2).addvar(\"%s.nmdasyn.b\",%d,%d)", this, $o1.object($2), $3, $4)
+    execute1(cmd)
+    sprint(cmd,"%s.glist.object(3).addvar(\"%s.nmdasyn.ica( 0.5 )\",%d,%d)", this, $o1.object($2), $3, $4)
+    execute1(cmd)
+    sprint(cmd,"%s.glist.object(3).addvar(\"%s.ampasyn.ica( 0.5 )\",%d,%d)", this, $o1.object($2), $3, $4)
+    execute1(cmd)
+    sprint(cmd,"%s.glist.object(3).addvar(\"%s.spine.head.ica( 0.5 )\",%d,%d)", this, $o1.object($2), $3, $4)
+    execute1(cmd)
+    syninds.append($2)
+    $o1.object($2).spine.head areas.append(area(0.5))
 }
+
 
 // rprintfile(String epsfilename, Double SaveFile)
 proc rprintfile() { local i, j
@@ -71,11 +89,12 @@ proc getlines() { local i
 }
 
 proc save() {
-    file = new FormatFile("VCaGraph","R","r")
-    file.aopen()
+    file = new FormatFile($s1,"R","r")
+    file.wopen()
     xvl = new List()
     yvl = new List()
-    
+    file.printvec("syninds",syninds)
+    file.printvec("areas",areas)
     gu.getlines_list(glist.object(0),xvl,yvl) 
     file.printlistasmat("tvsyn",xvl)
     file.printlistasmat("vsyn",yvl)
@@ -84,6 +103,18 @@ proc save() {
     gu.getlines_list(glist.object(1),xvl,yvl) 
     file.printlistasmat("tcasyn",xvl)
     file.printlistasmat("casyn",yvl)
+    xvl.remove_all()
+    yvl.remove_all()
+    gu.getlines_list(glist.object(2),xvl,yvl) 
+    file.printlistasmat("tbsyn",xvl)
+    file.printlistasmat("bsyn",yvl)
+    xvl.remove_all()
+    yvl.remove_all()
+    gu.getlines_list(glist.object(3),xvl,yvl) 
+    file.printlistasmat("ticasyn",xvl)
+    file.printlistasmat("icasyn",yvl)
+    xvl.remove_all()
+    yvl.remove_all()
     file.close()
 }
 
