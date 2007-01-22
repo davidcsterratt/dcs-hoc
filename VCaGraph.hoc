@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sVCaGraph = $Revision: 1.2 $, ",pkgversions)
+sprint(pkgversions,"%sVCaGraph = $Revision: 1.3 $, ",pkgversions)
 
 load_file("RPlot.hoc")
 load_file("FormatFile.hoc")
@@ -57,9 +57,9 @@ proc addvar() {
     execute1(cmd)
     sprint(cmd,"%s.glist.object(2).addvar(\"%s.nmdasyn.b\",%d,%d)", this, $o1.object($2), $3, $4)
     execute1(cmd)
-    sprint(cmd,"%s.glist.object(3).addvar(\"%s.nmdasyn.ica( 0.5 )\",%d,%d)", this, $o1.object($2), $3, $4)
+    sprint(cmd,"%s.glist.object(3).addvar(\"%s.nmdasyn.ica\",%d,%d)", this, $o1.object($2), $3, $4)
     execute1(cmd)
-    sprint(cmd,"%s.glist.object(3).addvar(\"%s.ampasyn.ica( 0.5 )\",%d,%d)", this, $o1.object($2), $3, $4)
+    sprint(cmd,"%s.glist.object(3).addvar(\"%s.ampasyn.ica\",%d,%d)", this, $o1.object($2), $3, $4)
     execute1(cmd)
     sprint(cmd,"%s.glist.object(3).addvar(\"%s.spine.head.ica( 0.5 )\",%d,%d)", this, $o1.object($2), $3, $4)
     execute1(cmd)
