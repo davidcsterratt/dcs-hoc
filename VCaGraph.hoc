@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sVCaGraph = $Revision: 1.3 $, ",pkgversions)
+sprint(pkgversions,"%sVCaGraph = $Revision: 1.4 $, ",pkgversions)
 
 load_file("RPlot.hoc")
 load_file("FormatFile.hoc")
@@ -19,6 +19,7 @@ objref xvl, yvl
 objref syninds, areas
 
 // VCaGraph(double rows, double cols)
+// This takes four arguments: left, top, width and height
 proc init() { local i, j
     rows=2
     vb = new VBox()
@@ -34,7 +35,7 @@ proc init() { local i, j
     glist.append(new Graph(0))
     glist.object(3).view(0, 0, 100, 0.1 , 930, 304, 300.48, 200.32)
     vb.intercept(0)
-    vb.map
+    vb.map("Spine variables", $1, $2, $3, $4)
     sprint(cmd,"graphList[0].append(%s.glist.object(0))", this)
     execute1(cmd)
     sprint(cmd,"graphList[2].append(%s.glist.object(1))", this)
