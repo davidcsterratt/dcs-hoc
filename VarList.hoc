@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sVarList = $Revision: 1.16 $, ",pkgversions)
+sprint(pkgversions,"%sVarList = $Revision: 1.17 $, ",pkgversions)
 
 load_file("FormatFile.hoc")
 load_file("ObjectClass.hoc")
@@ -92,6 +92,7 @@ proc init() {
     }
     oc = new ObjectClass()
 }
+
 func vector_exists() {
     sprint(cmd,"%s.ptr = %s", this, name)
     execute1(cmd)
@@ -164,29 +165,44 @@ public printf, fprint
 
 strdef name, cmd, action
 objref ptr, this
+objref oc
 
 // new Var("name")
 proc init() {
     init_value = 0
     sprint(name,"%s",$s1)
-    sprint(cmd,"%s.ptr = %s", this, name)
-    execute1(cmd)
     if (numarg() >= 2) {
         sprint(action,"%s",$s2)
     }
     if (numarg() >= 3) {
         init_value = $3
     }
+    oc = new ObjectClass()
 }
 
+func vectorlist_exists() {
+    sprint(cmd,"%s.ptr = %s", this, name)
+    execute1(cmd)
+    if (oc.object_is(ptr,"NULLobject")) {
+        print "VarList: Warning: ", name, " is NULLobject"
+        return 0
+    }
+    return 1
+}
+
+
 proc printf() { local i
-    print name, " = "
-    for i=0,ptr.count()-1 {
-        ptr.object(i).printf()
+    if (vectorlist_exists()) {
+        print name, " = "
+        for i=0,ptr.count()-1 {
+            ptr.object(i).printf()
+        }
     }
 }
 proc fprint() {
-    $o1.printlistasmat(name, ptr, init_value)
+    if (vectorlist_exists()) {
+        $o1.printlistasmat(name, ptr, init_value)
+    }
 }
 endtemplate VectorListVar
 
@@ -355,7 +371,7 @@ proc load() {
     }
 }
 
-func find () { local i
+func find() { local i
     for i=0, l.count()-1 {
         if (!strcmp(l.object(i).name,$s1)) {
             return i
