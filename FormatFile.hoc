@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sFormatFile = $Revision: 1.13 $, ",pkgversions)
+sprint(pkgversions,"%sFormatFile = $Revision: 1.14 $, ",pkgversions)
 
 /*
 
@@ -338,6 +338,9 @@ proc printvec_generic () { local i, chunk_size,  total_size, pos, name, blockend
                     f.printf("%s%s\n",closevec,lineend) 
                 }
                 f.printf("%s%s%s%g:%g%s %s %s ", varname, openind, rowstr, j+1, min((j+block_size),end+1),closeind, assop, openvec)
+            } else {
+                // Print separator if not end of block
+                f.printf("%s", elsep)
             }
             
             // Newline and ... every chunk_size elements
@@ -345,12 +348,8 @@ proc printvec_generic () { local i, chunk_size,  total_size, pos, name, blockend
                 f.printf("%s\n", linecont) 
             }
             
-            // Print out element itself  and separator, if necessary
-            if (j != end) {
-                f.printf("%.10g%s", $o2.x(j), elsep)
-            } else {
-                f.printf("%.10g", $o2.x(j))
-            }
+            // Print out element itself 
+            f.printf("%.10g", $o2.x(j))
         }
         
         // Print end of vector
