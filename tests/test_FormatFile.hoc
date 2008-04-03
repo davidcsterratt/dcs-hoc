@@ -51,18 +51,18 @@ proc print_tests() {
 // Should complain about this
 outfile = new FormatFile("test_FormatFile.null","skdfh")
 
-outfile = new FormatFile("test_FormatFile.m")
+outfile = new FormatFile("test_FormatFile")
 
 outfile.wopen()
 print_tests()
 outfile.close()
 
-outfile = new FormatFile("test_FormatFile.R","R")
+outfile = new FormatFile("test_FormatFile","R")
 outfile.wopen()
 print_tests()
 outfile.close()
 
-outfile = new FormatFile("test_FormatFile-struct.R","R","r")
+outfile = new FormatFile("test_FormatFile-struct","R","r")
 outfile.wopen()
 print_tests()
 outfile.close()
