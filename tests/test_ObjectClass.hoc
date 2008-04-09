@@ -1,0 +1,21 @@
+load_file("ObjectClass.hoc")
+
+objref oc
+oc = new ObjectClass()
+
+objref deck
+deck = new Deck()
+
+oc.object_name(deck)
+
+objref vec
+vec = new Vector()
+
+objref null
+
+print "deck is Deck",   oc.object_is(deck,"Deck")
+print "deck is Vector", oc.object_is(deck,"Vector")
+print "vec is Deck", oc.object_is(vec,"Deck")
+print "vec is Vector", oc.object_is(vec,"Vector")
+print "null is Deck", oc.object_is(null,"Deck")
+print "null is NULLobject", oc.object_is(null,"NULLobject")

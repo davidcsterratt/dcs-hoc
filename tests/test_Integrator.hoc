@@ -1,0 +1,21 @@
+load_file("Integrator.hoc")
+
+func sq(){
+    return $1*$1
+}
+objref x, y
+x = new Vector()
+x.indgen(0,10,1)
+y = new Vector()
+y = x.c
+objref integrator
+integrator = new Integrator()
+integral = integrator.integrate(y,x)
+// Answer should be 10^2/2 = 50
+// Is 50
+print integral
+y.apply("sq")
+integral = integrator.integrate(y,x)
+// Answer should be 10^3/3 = 333.33
+// Is 325
+print integral
