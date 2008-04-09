@@ -1,0 +1,23 @@
+load_file("utils.hoc")
+
+n = 100
+objref ratio, out
+ratio = new Vector()
+ratio.indgen(1, 10, 2.32)
+
+
+utils.mul_ratio_round(out, n, ratio)
+
+print "Ratio vector is"
+ratio.printf()
+
+print "utils.mul_ratio_round is being used to scale this up so that the sum is ", n
+print "The result is"
+out.printf()
+print "This sums to ", out.sum()
+print "The element-wise division of the results by the ratio is"
+objref out_div_ratio
+out_div_ratio = out.c()
+out_div_ratio.div(ratio)
+out_div_ratio.mul(ratio.sum()/out.sum())
+out_div_ratio.printf()
