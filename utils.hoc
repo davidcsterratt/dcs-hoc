@@ -1,5 +1,12 @@
 if (name_declared("pkgversions") != 4 ) { execute("strdef pkgversions") } 
-sprint(pkgversions,"%sutils = $Revision: 1.18 $, ",pkgversions)
+sprint(pkgversions,"%sutils = $Revision: 1.19 $, ",pkgversions)
+
+begintemplate Utils
+
+public error
+public min, max
+public mean, stdev
+public mul_ratio_round
 
 //
 // error(String error) 
@@ -60,5 +67,29 @@ proc stdev() { local i
     }
 }
 
+//
+// mul_ratio_round(Vector out, int n, Vector ratio) 
+// Return a vector OUT whose elements sum to N and are approximately in the ratio RATIO
+// 
+objref ratio, out, out_floor, out_rem, si
+proc mul_ratio_round() { local n, i
+    n     = $2
+    ratio = $o3
+    out   = ratio.c()
+    out.mul(n/ratio.sum())
+    out_rem = out.c
+    out.floor()
+    out_rem.sub(out)
+    si = out_rem.sortindex()
+    i = si.size()
+    while(out.sum() < n) {
+        i = i - 1
+        out.x(si.x(i)) = out.x(si.x(i)) + 1
+    }
+    $o1 = out
+}
 
+endtemplate Utils
 
+objref utils
+utils = new Utils()
