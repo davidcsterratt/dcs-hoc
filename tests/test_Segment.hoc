@@ -1,0 +1,39 @@
+load_file("Segment.hoc")
+load_file("FormatFile.hoc")
+load_file("ca1_migliore.hoc")
+
+objref segref
+apical[126] segref = new SegmentRef(0.5)
+print segref.x
+segref.secref.sec print secname()
+
+objref sl
+sl = new SectionList() 
+forsec "apical" {
+    sl.append()	
+}
+objref segreflist
+segreflist = new SegmentRefList()
+segreflist.append_nonzero_segments_from_seclist(sl)
+
+objref parents
+segreflist.parents(parents)
+
+strdef datafile
+datafile = "migliore_tree"
+
+objref outfile
+outfile = new FormatFile(datafile, "Matlab")
+outfile.wopen()
+outfile.printvec("r.parents", parents)
+outfile.close()
+
+objref segreflist2, inds
+segreflist2= new SegmentRefList()
+segreflist2.append_segment(segref)
+segreflist.find_ind(inds, segreflist2)
+
+inds.printf()
+
+print "This should be apical[126] 0.5"
+segreflist.srl.object(inds.x(0)).name()
