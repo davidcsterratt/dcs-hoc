@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sSegment = $Revision: 1.8 $, ",pkgversions)
+sprint(pkgversions,"%sSegment = $Revision: 1.9 $, ",pkgversions)
 
 /*
 
@@ -87,6 +87,7 @@ public append_nonzero_segments_from_seclist
 public append_segments_from_segreflist
 public display
 public parents
+public count
 
 // Private variables
 
@@ -221,6 +222,10 @@ proc parents() { local i, j, x, bsi
             $o1.x(i) = bsi
         }
     }
+}
+
+func count() {
+    return srl.count()
 }
 
 endtemplate SegmentRefList
