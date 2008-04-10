@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sSegment = $Revision: 1.9 $, ",pkgversions)
+sprint(pkgversions,"%sSegment = $Revision: 1.10 $, ",pkgversions)
 
 /*
 
@@ -84,10 +84,12 @@ public append_internal_segments_from_section
 public append_internal_segments_from_seclist
 public append_nonzero_segments_from_section
 public append_nonzero_segments_from_seclist
+public append_segment
 public append_segments_from_segreflist
 public display
 public parents
 public count
+public find_ind
 
 // Private variables
 
@@ -142,6 +144,10 @@ proc append_nonzero_segments_from_seclist() {
     forsec $o1 {
         append_nonzero_segments_from_section()
     }
+}
+
+proc append_segment() {
+    srl.append($o1)
 }
 
 proc append_segments_from_segreflist() {
@@ -226,6 +232,29 @@ proc parents() { local i, j, x, bsi
 
 func count() {
     return srl.count()
+}
+
+//
+// find_ind(Vector out, SegementRefList list)
+// Return in the vector OUT the indicies of LIST in this SegmentRefList
+// 
+proc find_ind() { local i, j, dx, bestdx
+    bestx = 1
+    $o1 = new Vector($o2.srl.count(), -1)
+    // Look through the list
+    for i=0, $o2.srl.count()-1 {
+        $o2.srl.object(i).secref.sec {
+            for j=0, srl.count()-1 {
+                if ((srl.object(j).secref.is_cas())) { 
+                    dx = abs(srl.object(j).x - $o2.srl.object(i).x)
+                    if (dx < bestdx) {
+                        $o1.x(i) = j
+                        bestdx = dx
+                    }
+                }
+            }
+        }
+    }
 }
 
 endtemplate SegmentRefList
