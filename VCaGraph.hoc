@@ -1,12 +1,12 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sVCaGraph = $Revision: 1.4 $, ",pkgversions)
+sprint(pkgversions,"%sVCaGraph = $Revision: 1.5 $, ",pkgversions)
 
 load_file("RPlot.hoc")
 load_file("FormatFile.hoc")
 load_file("GraphUtils.hoc")
 
 begintemplate VCaGraph
-public addvar, glist, rprintfile, save, syninds
+public addvar, glist, rprintfile, save
 
 strdef cmd
 objref vb
@@ -16,7 +16,7 @@ objref this
 objref file, rp
 objref gu
 objref xvl, yvl
-objref syninds, areas
+objref areas
 
 // VCaGraph(double rows, double cols)
 // This takes four arguments: left, top, width and height
@@ -46,26 +46,28 @@ proc init() { local i, j
     execute1(cmd)
     rp = new RPlot()
     gu = new GraphUtils()
-    syninds = new Vector()
     areas = new Vector()
 }
 
-// This takes an NmdaAmpaSpineSynStim object
+//
+// addvar(NmdaAmpaSpineSynStim input, double col, double linewidth)
+// Add voltage, calcium concntration, block value and calcium current from INPUT with particular
+// colour COL and linewidth LINEWIDTH
+//
 proc addvar() {
-    sprint(cmd,"%s.glist.object(0).addvar(\"%s.spine.head.v( 0.5 )\",%d,%d)", this, $o1.object($2), $3, $4)
+    sprint(cmd,"%s.glist.object(0).addvar(\"%s.spine.head.v( 0.5 )\",%d,%d)", this, $o1, $2, $3)
     execute1(cmd)
-    sprint(cmd,"%s.glist.object(1).addvar(\"%s.spine.head.cai( 0.5 )\",%d,%d)", this, $o1.object($2), $3, $4)
+    sprint(cmd,"%s.glist.object(1).addvar(\"%s.spine.head.cai( 0.5 )\",%d,%d)", this, $o1, $2, $3)
     execute1(cmd)
-    sprint(cmd,"%s.glist.object(2).addvar(\"%s.nmdasyn.b\",%d,%d)", this, $o1.object($2), $3, $4)
+    sprint(cmd,"%s.glist.object(2).addvar(\"%s.nmdasyn.b\",%d,%d)", this, $o1, $2, $3)
     execute1(cmd)
-    sprint(cmd,"%s.glist.object(3).addvar(\"%s.nmdasyn.ica\",%d,%d)", this, $o1.object($2), $3, $4)
+    sprint(cmd,"%s.glist.object(3).addvar(\"%s.nmdasyn.ica\",%d,%d)", this, $o1, $2, $3)
     execute1(cmd)
-    sprint(cmd,"%s.glist.object(3).addvar(\"%s.ampasyn.ica\",%d,%d)", this, $o1.object($2), $3, $4)
+    sprint(cmd,"%s.glist.object(3).addvar(\"%s.ampasyn.ica\",%d,%d)", this, $o1, $2, $3)
     execute1(cmd)
-    sprint(cmd,"%s.glist.object(3).addvar(\"%s.spine.head.ica( 0.5 )\",%d,%d)", this, $o1.object($2), $3, $4)
+    sprint(cmd,"%s.glist.object(3).addvar(\"%s.spine.head.ica( 0.5 )\",%d,%d)", this, $o1, $2, $3)
     execute1(cmd)
-    syninds.append($2)
-    $o1.object($2).spine.head areas.append(area(0.5))
+    $o1.spine.head areas.append(area(0.5))
 }
 
 
@@ -84,17 +86,14 @@ proc rprintfile() { local i, j
     rp.run()
 }
 
-// Get the lines from a grpah and save as a matrix
-// getlines(graph, xvec, ymat)
-proc getlines() { local i
-}
-
-proc save() {
-    file = new FormatFile($s1,"R","r")
-    file.wopen()
+//
+// save(File FILE) 
+// savie recordings from all panels to file handle FILE
+// 
+proc save() { localobj file
+    file = $o1
     xvl = new List()
     yvl = new List()
-    file.printvec("syninds",syninds)
     file.printvec("areas",areas)
     gu.getlines_list(glist.object(0),xvl,yvl) 
     file.printlistasmat("tvsyn",xvl)
@@ -116,7 +115,6 @@ proc save() {
     file.printlistasmat("icasyn",yvl)
     xvl.remove_all()
     yvl.remove_all()
-    file.close()
 }
 
 endtemplate VCaGraph
