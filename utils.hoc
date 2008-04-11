@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) { execute("strdef pkgversions") } 
-sprint(pkgversions,"%sutils = $Revision: 1.19 $, ",pkgversions)
+sprint(pkgversions,"%sutils = $Revision: 1.20 $, ",pkgversions)
 
 begintemplate Utils
 
@@ -7,6 +7,7 @@ public error
 public min, max
 public mean, stdev
 public mul_ratio_round
+public list_join, list_copy
 
 //
 // error(String error) 
@@ -15,7 +16,7 @@ public mul_ratio_round
 //
 
 proc error() {
-    print $s1
+    print "Error: ", $s1
     stop
 }
 
@@ -87,6 +88,29 @@ proc mul_ratio_round() { local n, i
         out.x(si.x(i)) = out.x(si.x(i)) + 1
     }
     $o1 = out
+}
+
+// 
+// list_join(List ldest, List lsrc)
+// Append every object in lsrc to ldest
+// 
+proc list_join() {
+    for i=0,$o2.count()-1 {
+        $o1.append($o2.object(i))
+    }
+}
+
+//
+// list_copy(ldest, lsrc, src_start, src_end) 
+// Copies lsrc into ldest, starting at src_start and finishing at src_end
+// 
+proc list_copy() { local src_start, src_end, i
+    src_start = $3
+    src_end   = $4
+    $o1 = new List()
+    for i = src_start, src_end {
+        $o1.append($o2.object(i))
+    }
 }
 
 endtemplate Utils
