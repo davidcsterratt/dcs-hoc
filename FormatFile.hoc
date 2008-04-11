@@ -1,5 +1,6 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sFormatFile = $Revision: 1.14 $, ",pkgversions)
+sprint(pkgversions,"%sFormatFile = $Revision: 1.15 $, ",pkgversions)
+load_file("utils.hoc")
 
 /*
 
@@ -119,9 +120,10 @@ strdef quot
 
 strdef tmpstr, rowstr, varname
 
-objref tmpmat, this
+objref tmpmat, this, utils
 
 proc init() {
+    utils = new Utils()
     // Args: Filename, Format (R or matlab), structur prefix
     start = 0
     end = 0
@@ -132,7 +134,7 @@ proc init() {
     if ( numarg() >= 2 ) {
         format = $s2
         if (!(!strcmp(format, "Matlab") || !strcmp(format, "R") || !strcmp(format, "hoc"))) {
-            print "FormatFile Error: unrecognised format specified"
+            utils.error("FormatFile: unrecognised format specified")
             return
         }
     }
