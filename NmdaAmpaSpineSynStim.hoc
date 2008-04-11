@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sNmdaAmpaSpineSynStim = $Revision: 1.5 $, ",pkgversions)
+sprint(pkgversions,"%sNmdaAmpaSpineSynStim = $Revision: 1.6 $, ",pkgversions)
 
 load_file("Spine.hoc")
 
@@ -15,7 +15,7 @@ s.get_distance()      - returns distance from origin specified by distance()
 
 begintemplate NmdaAmpaSpineSynStim
 
-public loc,  get_distance, event 
+public loc,  get_distance, event, destroy
 public ampasyn, nmdasyn, netcon, nmdanetcon, netstim, spine
 objref ampasyn, nmdasyn, netcon, nmdanetcon, netstim, spine 
 
@@ -43,6 +43,14 @@ func get_distance() {
     dist = distance(ampasyn.get_loc()) // Seems to work, though not documented
     pop_section()                 // needed to keep the stack in order
     return dist
+}
+
+proc destroy() {
+    objref ampasyn
+    objref nmdasyn
+    objref netstim
+    objref netcon
+    objref nmdanetcon
 }
 
 endtemplate NmdaAmpaSpineSynStim
