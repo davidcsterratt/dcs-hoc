@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sPointProcessDistributor = $Revision: 1.4 $, ",pkgversions)
+sprint(pkgversions,"%sPointProcessDistributor = $Revision: 1.5 $, ",pkgversions)
 
 /*
 PointProcessDistributor
@@ -83,7 +83,7 @@ proc setup_probs_from_seglist_with_refaxis() {
 }
 
 // distribute_pps_from_list(List pplist)
-func distribute_pps_from_list () { local  i, N
+func distribute_pps_from_list() { local  i, N
     if ( relprob.sum() == 0 ) { 
         print "PointProcessDistributor: Warning: No Point processes fall in the range specified"
         return 0
@@ -91,10 +91,8 @@ func distribute_pps_from_list () { local  i, N
     // Read in the point process list
     pplist = $o1
     N = pplist.count()
-    if (N == 0) { return(1) }
     if (numarg()==2) { $o2 = new Vector(N) }
-    
-    
+    if (N == 0) { return(1) }
     
     // Set up uniform distribution between 0 and relprob.sum()
     ran.uniform(0, relprob.sum() )
