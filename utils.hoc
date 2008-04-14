@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) { execute("strdef pkgversions") } 
-sprint(pkgversions,"%sutils = $Revision: 1.21 $, ",pkgversions)
+sprint(pkgversions,"%sutils = $Revision: 1.22 $, ",pkgversions)
 
 begintemplate Utils
 
@@ -77,7 +77,7 @@ proc stderr() { local i
     $o1 = new Vector($o2.ncol())
     for i=0, $o2.ncol()-1 {
         if ($o2.getcol(i).size > 1) {
-            $o1.x(i) = $o2.getcol(i).stdev()
+            $o1.x(i) = $o2.getcol(i).stderr()
         } else {
             $o1.x(i) = 0
         }
