@@ -1,11 +1,11 @@
 if (name_declared("pkgversions") != 4 ) { execute("strdef pkgversions") } 
-sprint(pkgversions,"%sutils = $Revision: 1.20 $, ",pkgversions)
+sprint(pkgversions,"%sutils = $Revision: 1.21 $, ",pkgversions)
 
 begintemplate Utils
 
 public error
 public min, max
-public mean, stdev
+public mean, stdev, stderr
 public mul_ratio_round
 public list_join, list_copy
 
@@ -41,29 +41,45 @@ func max() {
 }
 
 //
-// mean(Matrix src, Vector mean) 
+// mean(Vector dest, Matrix src) 
 // 
 // Compute mean of columns of src storing output in mean
 // 
 proc mean() { local i
-    $o2 = new Vector($o1.ncol())
-    for i=0, $o1.ncol()-1 {
-        $o2.x(i) = $o1.getcol(i).mean()
+    $o1 = new Vector($o2.ncol())
+    for i=0, $o2.ncol()-1 {
+        $o1.x(i) = $o2.getcol(i).mean()
     }
 }
 
 //
-// mean(Matrix src, Vector mean) 
+// stdev(Vector dest, Matrix src) 
 // 
-// Compute mean of columns of src storing output in mean
+// Compute standard deviation of columns of src storing output in stdev
 // 
 proc stdev() { local i
-    $o2 = new Vector($o1.ncol())
-    for i=0, $o1.ncol()-1 {
-        if ($o1.getcol(i).size > 1) {
-            $o2.x(i) = $o1.getcol(i).stdev()
+    $o1 = new Vector($o2.ncol())
+    for i=0, $o2.ncol()-1 {
+        if ($o2.getcol(i).size > 1) {
+            $o1.x(i) = $o2.getcol(i).stdev()
         } else {
-            $o2.x(i) = 0
+            $o1.x(i) = 0
+        }
+    }
+}
+
+//
+// stderr(Vector dest, Matrix src) 
+// 
+// Compute standard deviation of columns of src storing output in stderr
+// 
+proc stderr() { local i
+    $o1 = new Vector($o2.ncol())
+    for i=0, $o2.ncol()-1 {
+        if ($o2.getcol(i).size > 1) {
+            $o1.x(i) = $o2.getcol(i).stdev()
+        } else {
+            $o1.x(i) = 0
         }
     }
 }
