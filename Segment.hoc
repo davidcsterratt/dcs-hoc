@@ -1,5 +1,5 @@
 if (name_declared("pkgversions") != 4 ) {  execute("strdef pkgversions") }
-sprint(pkgversions,"%sSegment = $Revision: 1.10 $, ",pkgversions)
+sprint(pkgversions,"%sSegment = $Revision: 1.11 $, ",pkgversions)
 
 /*
 
@@ -89,7 +89,7 @@ public append_segments_from_segreflist
 public display
 public parents
 public count
-public find_ind
+public find_ind_of_segment
 
 // Private variables
 
@@ -235,26 +235,30 @@ func count() {
 }
 
 //
-// find_ind(Vector out, SegementRefList list)
-// Return in the vector OUT the indicies of LIST in this SegmentRefList
-// 
-proc find_ind() { local i, j, dx, bestdx
-    bestx = 1
-    $o1 = new Vector($o2.srl.count(), -1)
-    // Look through the list
-    for i=0, $o2.srl.count()-1 {
-        $o2.srl.object(i).secref.sec {
-            for j=0, srl.count()-1 {
-                if ((srl.object(j).secref.is_cas())) { 
-                    dx = abs(srl.object(j).x - $o2.srl.object(i).x)
-                    if (dx < bestdx) {
-                        $o1.x(i) = j
-                        bestdx = dx
-                    }
+// find_ind_of_segment(SegmentRef seg)
+// Find the index of the SegmentRef seg in the SegmentRefList. If the x value of 
+// SEG doesn't match precisely, pick the closest segment that does
+func find_ind_of_segment() { local i, j, dx, bestdx, bestind localobj seg
+    seg = $o1
+    bestdx  = 1
+    bestind = -1                        // This is the default value -- it means that the segment wasn't found
+    // Access the argument segment
+    seg.secref.sec {
+        // Look at each member of the segreflist
+        for j=0, srl.count()-1 {
+            // See if the member of the segreflist refers to the same section as SEG
+            if ((srl.object(j).secref.is_cas())) { 
+                // If so, see how close the x-values are
+                dx = abs(srl.object(j).x - seg.x)
+                // If the index improves on the previous one, then set the 
+                if (dx <= bestdx) {
+                    bestind = j
+                    bestdx = dx
                 }
             }
         }
     }
+    return(bestind)
 }
 
 endtemplate SegmentRefList
